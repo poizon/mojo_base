@@ -1,0 +1,162 @@
+<%
+layout 'admin';
+title  'Пользователи';
+%>
+
+% content_for main_container => begin
+	<div class="row">
+		<div class="col-sm-6">
+			<h4 class="page-header"><i class="fa fa-users"></i>&nbsp;Пользователи</h4>
+		</div>
+		<div class="col-sm-6">
+			<a class="btn btn-sm btn-success float-right" href="<%= url_for('admin_user_create') %>">
+				<i class="fa fa-plus-circle"></i>&nbsp;Добавить нового пользователя
+			</a>
+		</div>
+	</div>
+
+	<hr/>
+
+	<div class="row">
+		<div class="col-sm-6">
+			<button class="btn btn-sm btn-secondary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+				<i class="fa fa-filter" aria-hidden="true"></i> Фильтр
+			</button>
+			<div class="collapse" id="collapseExample">
+				<div class="card card-body">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="dropdown float-right">
+				<button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					Поиск пользователя
+				</button>
+				<div class="dropdown-menu">
+					<form class="px-3 py-3">
+						<div class="form-group">
+							<label for="exampleDropdownFormEmail1">Поиск по имени или email</label>
+							<input type="email" class="form-control" id="exampleDropdownFormEmail1">
+						</div>
+						<button type="submit" class="btn btn-primary">Искать</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="clearfix"></div><br/>
+	
+	<div class="row">
+		<div class="col-sm-12">
+			<table class="table table-sm table-bordered">
+				<thead class="thead-light">
+					<tr>
+						<th scope="col" class="center-text"><input type="checkbox" /></th>
+						<th scope="col" class="center-text">id</th>
+						<th scope="col" class="center-text">Аватар</th>
+						<th scope="col">Имя пользователя</th>
+						<th scope="col">E-mail</th>
+						<th scope="col">Создан</th>
+						<th scope="col" class="center-text">Активирован</th>
+						<th scope="col" class="center-text">Админ</th>
+					</tr>
+				</thead>
+				<tbody>
+					<% for (@$users) { %>
+						<tr>
+							<td scope="row" align="center"><input type="checkbox" /></td>
+							<th class="center-text" scope="row">
+								<a href="<%= url_for('admin_user_detail', id => $_->{id}) %>"><%= $_->{id} %></a>
+							</th>
+							<td align="center">
+								<a href="<%= url_for('admin_user_detail', id => $_->{id}) %>">
+									<img class="img-circle" src="/app/img/default-avatar.png" width="32" />
+								</a>
+							</td>
+							<td>
+								<a href="<%= url_for('admin_user_detail', id => $_->{id}) %>"><%= $_->{username} %></a>
+							</td>
+							<td><%= $_->{email} %></td>
+							<td><%= $_->{created} %></td>
+							<td align="center">
+								<%== $_->{is_activated} ? '<i class="fa fa-check-circle text-success"></i>' : '<i class="fa fa-minus-circle text-danger"></i>' %>
+							</td>
+							<td align="center">
+								<%== $_->{is_admin} ? '<i class="fa fa-check-circle text-success"></i>' : '<i class="fa fa-minus-circle text-danger"></i>' %>
+							</td>
+						</tr>
+					<% } %>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-sm-4">
+			<select class="form-control">
+				<option disabled selected>Действие над выбранными</option>
+				<option>Удалить</option>
+				<option>Сделать активными</option>
+				<option>Сделать неактивными</option>
+			</select>
+		</div>
+		<div class="col-sm-8">
+			<nav aria-label="Page navigation example" class="float-right">
+				<ul class="pagination">
+					<li class="page-item disabled">
+						<a class="page-link" href="#" aria-label="Previous">
+							<span aria-hidden="true">&laquo;</span>
+							<span class="sr-only">Previous</span>
+						</a>
+					</li>
+					<li class="page-item active"><a class="page-link" href="#">1</a></li>
+					<li class="page-item"><a class="page-link" href="#">2</a></li>
+					<li class="page-item"><a class="page-link" href="#">3</a></li>
+					<li class="page-item">
+						<a class="page-link" href="#" aria-label="Next">
+							<span aria-hidden="true">&raquo;</span>
+							<span class="sr-only">Next</span>
+						</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+
+	<div id="user-delete-modal" class="modal fade" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title"></h4>
+				</div>
+				<div class="modal-body">
+					<p></p>
+				</div>
+				<div class="modal-footer">
+					<a href="/admin/users/" class="btn btn-primary">
+						<i class="fa fa-trash"></i>&nbsp;Удалить
+					</a>
+					<button type="button" class="btn btn-default" data-dismiss="modal">
+						<i class="fa fa-close"></i>&nbsp;Отмена
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+% end
+
+% content_for scripts => begin
+	<script type="text/javascript">
+	 $('#user-delete-modal').on('show.bs.modal',function(e){
+		 var modal = $(this);
+		 var btn = $(e.relatedTarget);
+		 modal.find('.modal-title').text('Подтверждение на удаление пользователя');
+		 modal.find('.modal-body p').text('Вы действительно хотите удалить пользователя '+btn.data('username')+'?');
+		 modal.find('.modal-footer a').attr('href', '/admin/users/'+btn.data('id')+'/delete/');
+	 })
+	</script>
+% end

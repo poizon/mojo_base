@@ -1,0 +1,157 @@
+<%
+layout 'admin';
+title  ($user ? 'Профиль пользователя "'.$user->{username}.'"': 'Создание нового пользователя');
+my $has_user = defined $user;
+%>
+
+% content_for main_container => begin
+	<h4><i class="fa fa-users"></i> <%= title %></h4>
+	<div class="row">
+		<div class="col-sm-12">
+			<nav aria-label="breadcrumb" role="navigation">
+				<ol class="breadcrumb">
+					<li class="breadcrumb-item"><a href="<%= url_for('admin') %>">Главная</a></li>
+					<li class="breadcrumb-item"><a href="<%= url_for('admin_user_list') %>">Пользователи</a></li>
+					<li class="breadcrumb-item active" aria-current="page"><%= title %></li>
+				</ol>
+			</nav>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="card bg-light">
+				<div class="card-body">
+					<form class="form-horizontal" action="<%= $has_user ? url_for('admin_user_update') : url_for('admin_user_create') %>" method="POST" enctype="multipart/form-data">
+						<input type="hidden" name="id" value="<%= $user->{id} %>" />
+						<div class="col-sm-3 float-left">
+							<img class="img-thumbnail col-sm-12" src="/app/img/default-avatar.png" />
+							<div class="clearfix"></div><br/>
+							<label class="custom-file col-sm-12">
+								<input type="file" id="avatar" class="custom-file-input" name="avatar">
+								<span class="custom-file-control"><i class="fa fa-upload"></i></span>
+							</label>
+							<!-- <button class="btn btn-primary col-sm-12">
+								 <i class="fa fa-upload"></i>&nbsp;Загрузить
+								 </button> -->
+						</div>
+						<div class="col-sm-9 float-right">
+							<div class="row">
+								<div class="col-sm-6 form-group">
+									<input type="text" class="form-control" name="username" id="username" placeholder="*Имя пользователя" value="<%= $has_user ? $user->{username} : '' %>">
+								</div>
+								<div class="col-sm-6 form-group float-right">
+									<input type="email" class="form-control" name="email" id="email" placeholder="*E-mail" value="<%= $has_user ? $user->{email} : '' %>">
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-sm-6 form-group">
+									<input type="text" class="form-control" name="first_name" id="first_name" placeholder="Имя" value="<%= $has_user ? $user->{first_name} : '' %>">
+								</div>
+								<div class="col-sm-6 form-group float-right">
+									<input type="text" class="form-control" name="last_name" id="last_name" placeholder="Фамилия" value="<%= $has_user ? $user->{last_name} : '' %>">
+								</div>
+							</div>
+							<div class="row">
+								<% if ($has_user) { %>
+									<div class="col-sm-6 form-group">
+										<button class="btn btn-warning">
+											<i class="fa fa-pencil" aria-hidden="true"></i> Изменить пароль
+										</button>
+									</div>
+								<% } else { %>
+									<div class="col-sm-6 form-group">
+										<input type="password" class="form-control" name="password" id="password" placeholder="*Пароль">
+									</div>
+									<div class="col-sm-6 form-group float-right">
+										<input type="password" class="form-control" name="password-confirm" id="password-confirm" placeholder="*Подтверждение пароля">
+									</div>
+								<% } %>
+							</div>
+							<div class="row">
+								<div class="col-sm-6 form-group">
+									<input type="checkbox" name="is_active" id="is-active" <% if ($has_user && $user->{is_activated}) { %>checked<% } %>/>
+									<label for="is-active">Активировать</label>
+									<br/>
+									<input type="checkbox" name="is_admin" id="is-admin" <% if ($has_user && $user->{is_admin}) { %>checked<% } %>/>
+									<label for="is-admin">Администратор</label>
+								</div>
+							</div>
+						</div>
+						<div class="clearfix"></div>
+						<div class="col-sm-12">
+							<hr/>
+							<% if ($has_user) { %>
+								<button type="submit" class="btn btn-success">
+									<i class="fa fa-floppy-o" aria-hidden="true"></i> Сохранить
+								</button>
+								<a href="<%= url_for('admin_user_list') %>" class="btn btn-secondary m-l-30">
+									<i class="fa fa-undo" aria-hidden="true"></i> Назад
+								</a>
+								<button type="button" class="btn btn-danger float-right" data-toggle="modal" data-target="#deleteModal">
+									<i class="fa fa-trash" aria-hidden="true"></i> Удалить
+								</button>
+							<% } else { %>
+								<button type="submit" class="btn btn-success">
+									<i class="fa fa-plus"></i> Создать
+								</button>
+								<a href="<%= url_for('admin_user_list') %>" class="btn btn-secondary float-right">
+									<i class="fa fa-remove"></i> Отмена
+								</a>
+							<% } %>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<% if ($has_user) { %>
+		<div id="deleteModal" class="modal" tabindex="-1" role="dialog" data-id="<%= $user->{id} %>">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">
+							<i class="fa fa-trash" aria-hidden="true"></i> Удаление профиля пользователя
+						</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<p>
+							Вы действительно хотите удалить профиль пользователя "<b><%= $user->{username} %></b>" и все связанные с ним данные?
+						</p>
+					</div>
+					<div class="modal-footer">
+						<button id="del-yes-btn" type="button" class="btn btn-danger">
+							<i class="fa fa-check" aria-hidden="true"></i> Да
+						</button>
+						<button type="button" class="btn btn-secondary m-l-30" data-dismiss="modal">
+							<i class="fa fa-times" aria-hidden="true"></i> Отмена
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	<% } %>
+% end
+
+% content_for scripts => begin
+	<script type="text/javascript">
+	 (function(){
+		 $('#del-yes-btn').on('click', function(e){
+			 e.preventDefault();
+			 _request({
+				 url: "<%= url_for('admin_user_delete', id => $user->{id}) %>",
+				 method: 'DELETE'
+			 }).then(function(resp){
+				 $('#deleteModal').modal('hide');
+				 window.location.replace("<%= url_for('admin_user_list') %>");
+			 }).catch(function(err){
+				 alert(err.statusText || JSON.stringify(err));
+			 });
+		 });
+	 })();
+	</script>
+% end

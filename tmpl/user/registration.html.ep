@@ -1,0 +1,69 @@
+<%
+layout 'auth';
+title 'Форма входа';
+%>
+
+<div class="row">
+	<div class="well col-xs-12 col-sm-10 col-md-8 col-lg-6 center-block none-float">
+		<form action="" method="POST" class="form-horizontal">
+			<fieldset>
+				<legend><span class="glyphicon glyphicon-user"></span>&nbsp;<%= title %></legend>
+				<div class="form-group">
+					<div class="form-group">
+						<label for="" class="col-xs-12 col-sm-4 col-md-4 col-lg-4 control-label">
+							<sup class="require">*</sup>Имя пользователя
+						</label>
+						<div class="col-xs-12 col-sm-8 col-md-8 col-lg-8">
+							<input type="text" id="email" class="form-control" placeholder="Имя пользователя" required autofocus>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="" class="col-xs-12 col-sm-4 col-md-4 col-lg-4 control-label">
+							<sup class="require">*</sup>E-mail
+						</label>
+						<div class="col-xs-12 col-sm-8 col-md-8 col-lg-8">
+							<input type="text" id="email" class="form-control" placeholder="E-mail" required autofocus>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="" class="col-xs-12 col-sm-4 col-md-4 col-lg-4 control-label">
+							<sup class="require">*</sup>Пароль
+						</label>
+						<div class="col-xs-12 col-sm-8 col-md-8 col-lg-8">
+							<input type="password" id="email" class="form-control" placeholder="Пароль" required autofocus>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="" class="col-xs-12 col-sm-4 col-md-4 col-lg-4 control-label">
+							<sup class="require">*</sup>Подтверждение пароля
+						</label>
+						<div class="col-xs-12 col-sm-8 col-md-8 col-lg-8">
+							<input type="password" id="email" class="form-control" placeholder="Подтверждение пароля" required autofocus>
+						</div>
+					</div>
+					<div class="hidden-xs form-group">
+						<div class="col-xs-12 col-sm-8 col-sm-offset-4 col-md-8 col-md-offset-4 col-lg-8 col-lg-offset-4">
+							<button type="submit" class="btn btn-primary">
+								<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>&nbsp;Зарегистрироваться
+							</button>&nbsp;&nbsp;&nbsp;
+							<a href="" role="button" class="btn btn-default">
+								<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>&nbsp;Отмена
+							</a>
+						</div>
+					</div>
+					<div class="visible-xs form-group">
+						<div class="col-xs-12">
+							<button type="submit" class="btn btn-primary col-xs-12">
+								<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>&nbsp;Зарегистрироваться
+							</button>
+							<div class="clearfix"></div><br/>
+							<a href="" role="button" class="btn btn-default col-xs-12">
+								<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>&nbsp;Отмена
+							</a>
+						</div>
+					</div>
+				</div>
+			</fieldset>
+		</form>
+	</div>
+</div>

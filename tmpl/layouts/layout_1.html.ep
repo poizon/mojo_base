@@ -1,0 +1,65 @@
+% layout 'base';
+
+% content_for header => begin
+	<link href="/app/css/style.css" rel="stylesheet" type="text/css">
+% end
+
+<header>
+	<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+		<a class="navbar-brand" href="#">MojoBase <span class="badge badge-success">v<%= app->VERSION() %></span></a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarCollapse">
+			<ul class="navbar-nav mr-auto">
+				<li class="nav-item active">
+					<a class="nav-link" href="#">Главная <span class="sr-only">(current)</span></a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="#">Новости</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link disabled" href="#">Статьи</a>
+				</li>
+			</ul>
+			<form class="form-inline ml-auto">
+				<input class="form-control mr-sm-2" type="text" placeholder="Поиск" aria-label="Search">
+				<button class="btn btn-outline-success my-2 my-sm-0" type="submit">Поиск</button>
+			</form>
+			<ul class="navbar-nav ml-auto">
+				<li class="nav-item dropdown ml-auto">
+					<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<%= session('username') %>
+					</a>
+					<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+						<a class="dropdown-item" href="#">Перейти на сайт</a>
+						<a class="dropdown-item" href="<%= url_for('admin_user_detail', id => session('user_id')) %>">Профиль пользователя</a>
+						<div class="dropdown-divider"></div>
+						<a class="dropdown-item" href="<%= url_for('admin_logout') %>">Выход</a>
+					</div>
+				</li>
+			</ul>
+		</div>
+	</nav>
+</header>
+
+<!-- Begin page content -->
+<main role="main" class="container">
+	<div class="row">
+		<div class="col-sm-12 jumbotron">
+				<h3>MojoBase - болванка для создания типовых Perl/Mojolicious - web-приложений.</h3>
+				<p class="lead">Реализованы такие функции, как: авторизация/аунтентификация, новостная лента, меню и контентные страницы, галереи изображений, админка.</p>
+				<hr>
+				<p>Распространяется в рамках GNU GPL v2 или более поздних версий этой лицензии.</p>
+				<p class="lead">
+					<a class="btn btn-primary btn-lg" href="#" role="button">Начать пользоваться</a>
+				</p>
+		</div>
+	</div>
+</main>
+
+<footer class="footer">
+	<div class="container">
+		<span class="text-muted">All rights reserved! <a href="#">MojoBase</a> CopyRight &copy; 2017</span>
+	</div>
+</footer>

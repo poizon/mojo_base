@@ -1,0 +1,10 @@
+severity        = harsh
+include         = NamingConventions ClassHierarchies
+exclude         = Variables Modules::RequirePackage
+criticism-fatal = 1
+color           = 1
+allow-unsafe    = 1
+pager           = less
+
+[Modules::ProhibitExcessMainComplexity]
+max_mccabe = 30

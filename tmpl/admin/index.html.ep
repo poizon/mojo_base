@@ -1,0 +1,7 @@
+<%
+layout 'admin';
+title  'Панель администратора';
+%>
+
+% content_for main_container => begin
+% end

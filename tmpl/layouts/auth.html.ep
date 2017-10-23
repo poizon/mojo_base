@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="">
+		<meta name="author" content="">
+		<link rel="icon" href="/app/img/favicon_16.png">
+		<title><%= stash('title') %></title>
+		<link href="/admin/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+		<link href="/app/css/auth.css" rel="stylesheet" type="text/css">
+	</head>
+
+	<body>
+		<div class="container">
+			%== content
+		</div>
+
+		<script src="/admin/js/jquery-3.2.1.min.js"></script>
+		<script src="/admin/js/bootstrap.min.js"></script>
+	</body>
+</html>
+

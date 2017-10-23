@@ -1,0 +1,6 @@
+bin/*.BIN
+local/
+local/*
+logs/*
+static/uploads
+static/uploads/*

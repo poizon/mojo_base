@@ -1,0 +1,85 @@
+<%
+layout 'admin';
+title  ($page ? 'Редактирование страницы "'.$page->{title}.'"': 'Создание новой страницы');
+my $has_page = defined $page;
+%>
+
+% content_for main_container => begin
+	<h4><i class="fa fa-users"></i> <%= title %></h4>
+	<div class="row">
+		<div class="col-sm-12">
+			<nav aria-label="breadcrumb" role="navigation">
+				<ol class="breadcrumb">
+					<li class="breadcrumb-item"><a href="<%= url_for('admin') %>">Главная</a></li>
+					<li class="breadcrumb-item"><a href="<%= url_for('admin_pages_list') %>">Страницы</a></li>
+					<li class="breadcrumb-item active" aria-current="page"><%= title %></li>
+				</ol>
+			</nav>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="card bg-light">
+				<div class="card-body">
+					<form class="form-horizontal" action="<%= $has_page ? url_for('admin_user_update') : url_for('admin_user_create') %>" method="POST" enctype="multipart/form-data">
+						<div class="col-sm-12">
+							<div class="row">
+								<div class="col-sm-12 form-group">
+									<input type="text" class="form-control" name="title" id="title" placeholder="*Заголовок страницы" value="<%= $has_page ? $page->{title} : '' %>">
+								</div>
+								<div class="col-sm-12 form-group">
+									<textarea class="form-control" name="body" id="body">
+									</textarea>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-sm-6 form-group">
+									<input type="checkbox" name="is_public" id="is-public" <% if ($has_page && $page->{is_public}) { %>checked<% } %>/>
+									<label for="is-active">Опубликовать</label>
+								</div>
+							</div>
+						</div>
+						<div class="clearfix"></div>
+						<div class="col-sm-12">
+							<hr/>
+							<% if ($has_page) { %>
+								<button type="submit" class="btn btn-success">
+									<i class="fa fa-floppy-o" aria-hidden="true"></i> Сохранить
+								</button>
+								<a href="<%= url_for('admin_user_list') %>" class="btn btn-secondary m-l-30">
+									<i class="fa fa-undo" aria-hidden="true"></i> Назад
+								</a>
+								<button type="button" class="btn btn-danger float-right" data-toggle="modal" data-target="#deleteModal">
+									<i class="fa fa-trash" aria-hidden="true"></i> Удалить
+								</button>
+							<% } else { %>
+								<button type="submit" class="btn btn-success">
+									<i class="fa fa-plus"></i> Создать
+								</button>
+								<a href="<%= url_for('admin_user_list') %>" class="btn btn-secondary float-right">
+									<i class="fa fa-remove"></i> Отмена
+								</a>
+							<% } %>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+% end
+
+% content_for scripts => begin
+	<script src="/deps/ckeditor/ckeditor.js"></script>
+	<script type="text/javascript">
+	 ClassicEditor
+		 .create(document.querySelector('#body'), {
+			 toolbar: [
+				 'undo', 'redo', '|',
+				 'headings', 'bold', 'italic', 'bulletedList', 'numberedList', 'link', 'blockQuote', 'image'
+			 ],
+		 })
+		 .then(editor => { console.log( editor ); })
+		 .catch(error => { console.error( error ); });
+	</script>
+% end
