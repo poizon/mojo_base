@@ -65,7 +65,7 @@ title  'Пользователи';
 				<tbody>
 					<% for (@$users) { %>
 						<tr>
-							<td scope="row" align="center"><input type="checkbox" /></td>
+							<td class="center-text" scope="row"><input type="checkbox" /></td>
 							<th class="center-text" scope="row">
 								<a href="<%= url_for('admin_user_detail', id => $_->{id}) %>"><%= $_->{id} %></a>
 							</th>

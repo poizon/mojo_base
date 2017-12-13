@@ -58,10 +58,31 @@ title  'Контентные страницы';
 						<th scope="col">Автор</th>
 						<th scope="col">Дата создания</th>
 						<th scope="col">Дата изменения</th>
-						<th scope="col" class="center-text">Опубликована</th>
+						<th scope="col" class="center-text">Статус</th>
 					</tr>
 				</thead>
 				<tbody>
+					<% for my $p (@$pages) { %>
+						<tr>
+							<td class="center-text" scope="row"><input type="checkbox" /></td>
+							<td class="center-text" scope="row"><%= $p->{id} %></td>
+							<td><%= $p->{title} %></td>
+							<td>
+								<a href="<%= url_for('admin_user_detail', id => $p->{user_id}) %>">
+									<%= $p->{username} %> (<%= $p->{email} %>)
+								</a>
+							</td>
+							<td><%= $p->{dt_created} %></td>
+							<td><%= $p->{dt_modified} %></td>
+							<td class="center-text" scope="row">
+								<% if ($p->{is_public}) { %>
+									<span class="badge badge-success">опубликована</span>
+								<% } else { %>
+									<span class="badge badge-primary">черновик</span>
+								<% } %>
+							</td>
+						</tr>
+					<% } %>
 				</tbody>
 			</table>
 		</div>

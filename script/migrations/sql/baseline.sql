@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS `pages` (
    	   `body` TEXT NOT NULL,
 	   `dt_created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
    	   `dt_modified` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   	   `dt_publication` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
    	   `is_public` BOOLEAN DEFAULT FALSE,
 	   `user_id` INT NOT NULL,
    	   PRIMARY KEY (`id`),

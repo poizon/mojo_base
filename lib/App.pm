@@ -13,7 +13,7 @@ use POSIX 'strftime';
 use App::Util 'extend';
 use Mojo::Util 'monkey_patch';
 
-our $VERSION = '0.0.15';
+our $VERSION = '0.0.16';
 
 has json   => sub { return JSON::XS->new->utf8; };
 has conf   => sub { return extend(do './conf/app.conf', do './conf/app-dev.conf'); };
