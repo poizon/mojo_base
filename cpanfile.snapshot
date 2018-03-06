@@ -212,6 +212,20 @@ DISTRIBUTIONS
       perl v5.8.1
       strict 0
       utf8 0
+  DBD-mysql-4.046
+    pathname: C/CA/CAPTTOFU/DBD-mysql-4.046.tar.gz
+    provides:
+      Bundle::DBD::mysql 4.046
+      DBD::mysql 4.046
+      DBD::mysql::GetInfo undef
+      DBD::mysql::db 4.046
+      DBD::mysql::dr 4.046
+      DBD::mysql::st 4.046
+    requirements:
+      DBI 1.609
+      Data::Dumper 0
+      ExtUtils::MakeMaker 0
+      perl 5.008001
   DBI-1.637
     pathname: T/TI/TIMB/DBI-1.637.tar.gz
     provides:
@@ -792,8 +806,8 @@ DISTRIBUTIONS
       if 0
       perl 5.00503
       strict 0
-  Mojolicious-7.55
-    pathname: S/SR/SRI/Mojolicious-7.55.tar.gz
+  Mojolicious-7.70
+    pathname: S/SR/SRI/Mojolicious-7.70.tar.gz
     provides:
       Mojo undef
       Mojo::Asset undef
@@ -862,7 +876,7 @@ DISTRIBUTIONS
       Mojo::UserAgent::Transactor undef
       Mojo::Util undef
       Mojo::WebSocket undef
-      Mojolicious 7.55
+      Mojolicious 7.70
       Mojolicious::Command undef
       Mojolicious::Command::cgi undef
       Mojolicious::Command::cpanify undef
