@@ -1,6 +1,6 @@
-requires 'perl'        => '==5.26.1';
+requires 'perl'        => '==5.26.2';
 
-requires 'Mojolicious' => '==7.70';
+requires 'Mojolicious' => '==7.77';
 requires 'JSON::XS';
 requires 'Time::Moment';
 requires 'DBI';
