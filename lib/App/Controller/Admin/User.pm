@@ -11,7 +11,7 @@ use Data::Dumper;
 sub list {
     my $s = shift;
     my $users = $s->model('User')->find_by(
-        'SELECT id,username,email,created,is_activated,is_admin FROM users LIMIT 100'
+        'SELECT id,username,email,first_name,last_name,created,is_activated,is_admin FROM users LIMIT 100'
     );
     return $s->render(template => 'admin/users/list', users => $users);
 }
@@ -22,10 +22,6 @@ sub create {
     if ($s->req->method eq 'POST') {
         my $params = $s->req->body_params->to_hash();
         my $avatar = $s->param('avatar');
-
-        warn "AVA: ".Dumper $avatar->size;
-        warn "AVA: ".Dumper $avatar->filename;
-        warn "CAN: ".Dumper $avatar->move_to('ttt.jpg');
 
         # TODO: провалидировать данные
     

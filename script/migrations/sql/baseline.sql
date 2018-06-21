@@ -10,17 +10,17 @@ FLUSH PRIVILEGES;
 
 -- Таблица с историей историей миграций
 CREATE TABLE IF NOT EXISTS `migrations` (
-	   `id` INTEGER NOT NULL AUTO_INCREMENT,
+	   `id` INTEGER NOT NULL,
 	   `name` VARCHAR(120) NOT NULL,
 	   `applied` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	   `comment` VARCHAR(250),
 	   PRIMARY KEY (`id`)
-) ENGINE='InnoDB';
+);
 CREATE INDEX `name__migrations_idx` ON `migrations` (`name`);
 
 -- Таблица учетных записей пользователей
 CREATE TABLE IF NOT EXISTS `users` (
-	   `id` INTEGER NOT NULL AUTO_INCREMENT,
+	   `id` INTEGER NOT NULL,
 	   `username` VARCHAR(50) NOT NULL UNIQUE,
 	   `email` VARCHAR(50) NOT NULL UNIQUE,
 	   `uid` VARCHAR(50) NOT NULL,
@@ -33,24 +33,24 @@ CREATE TABLE IF NOT EXISTS `users` (
 	   `is_activated` BOOLEAN DEFAULT FALSE,
    	   `is_admin` BOOLEAN DEFAULT FALSE,
    	   PRIMARY KEY (`id`)
-) ENGINE='InnoDB';
+);
 CREATE INDEX `uid__users_idx` ON `users` (`uid`);
 CREATE INDEX `email__users_idx` ON `users` (`email`);
 CREATE INDEX `username__users_idx` ON `users` (`username`);
 
 -- Таблица сессий
 CREATE TABLE IF NOT EXISTS `sessions` (
-	   `id` INTEGER NOT NULL AUTO_INCREMENT,
+	   `id` INTEGER NOT NULL,
 	   `session_key` VARCHAR(32) NOT NULL UNIQUE,
    	   `session_data` TEXT NULL,
 	   `expired` DATETIME NOT NULL,
    	   PRIMARY KEY (`id`)
-) ENGINE='InnoDB';
+);
 CREATE INDEX `session_key__sessions_idx` ON `sessions` (`session_key`);
 
 -- Таблица контентных страниц
 CREATE TABLE IF NOT EXISTS `pages` (
-	   `id` INTEGER NOT NULL AUTO_INCREMENT,
+	   `id` INTEGER NOT NULL,
 	   `title` VARCHAR(250) NOT NULL,
    	   `body` TEXT NOT NULL,
 	   `dt_created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -60,15 +60,15 @@ CREATE TABLE IF NOT EXISTS `pages` (
 	   `user_id` INT NOT NULL,
    	   PRIMARY KEY (`id`),
    	   FOREIGN KEY (`user_id`) REFERENCES users(`id`) ON DELETE CASCADE
-) ENGINE='InnoDB';
+);
 CREATE INDEX `user_id__pages_idx` ON `pages` (`user_id`);
 
 -- Таблица статистики
 CREATE TABLE IF NOT EXISTS `stats` (
-	   `id` INTEGER NOT NULL AUTO_INCREMENT,
+	   `id` INTEGER NOT NULL,
 	   `name` VARCHAR(50) NOT NULL,
    	   `value` INTEGER NOT NULL DEFAULT 0,
 	   `dt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
    	   PRIMARY KEY (`id`)
-) ENGINE='InnoDB';
+);
 CREATE UNIQUE INDEX index_unique_on_a_and_b ON stats (`name`, `dt`);

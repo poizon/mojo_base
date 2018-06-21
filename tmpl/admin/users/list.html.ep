@@ -57,6 +57,8 @@ title  'Пользователи';
 						<th scope="col" class="center-text">Аватар</th>
 						<th scope="col">Имя пользователя</th>
 						<th scope="col">E-mail</th>
+						<th scope="col">Имя</th>
+						<th scope="col">Фамилия</th>
 						<th scope="col">Создан</th>
 						<th scope="col" class="center-text">Активирован</th>
 						<th scope="col" class="center-text">Админ</th>
@@ -78,6 +80,8 @@ title  'Пользователи';
 								<a href="<%= url_for('admin_user_detail', id => $_->{id}) %>"><%= $_->{username} %></a>
 							</td>
 							<td><%= $_->{email} %></td>
+							<td><%= $_->{first_name} %></td>
+							<td><%= $_->{last_name} %></td>
 							<td><%= $_->{created} %></td>
 							<td align="center">
 								<%== $_->{is_activated} ? '<i class="fa fa-check-circle text-success"></i>' : '<i class="fa fa-minus-circle text-danger"></i>' %>

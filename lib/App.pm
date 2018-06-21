@@ -24,12 +24,12 @@ has db     => sub {
     
     my $dbh = eval {
         DBI->connect(
-            $cfg->{mysql}->{dsn},
-            $cfg->{mysql}->{user},
-            $cfg->{mysql}->{password},
-            {RaiseError => 1, AutoCommit => 1}
+            "dbi:SQLite:dbname=$cfg->{default}->{db_name}",
+            '', # no user
+            '', # no passwd
+            { RaiseError => 1, sqlite_unicode => 1 }
         );
-    } or croak("$@");
+    } or croak($@);
 
     return $dbh;
 };

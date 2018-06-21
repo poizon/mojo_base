@@ -4,3 +4,7 @@ local/*
 logs/*
 static/uploads
 static/uploads/*
+*.db
+*.bak
+*.sqlite
+*.sqlite3

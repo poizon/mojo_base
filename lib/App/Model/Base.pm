@@ -71,7 +71,7 @@ sub get_by_id {
     $fields = (($fields && @$fields) ? join ',', @$fields : '*');
 
     my $result = eval {
-        $s->db->selectrow_hashref(qq[SELECT $fields FROM ${\$s->table} WHERE id=? LIMIT 1], undef, $id);
+        $s->db->selectrow_hashref(qq[SELECT $fields FROM ${\$s->table} WHERE id=?], undef, $id);
     } or croak("$@");
 
     return $result;
