@@ -2,6 +2,8 @@ package App::Model::Base;
 
 use strict;
 use warnings;
+use DBI;
+use Data::Dumper;
 
 use Carp 'croak';
 
@@ -86,8 +88,10 @@ sub get_by {
 
     my $result = eval {
         $s->db->selectrow_hashref($sql, undef, values %$data);
-    } or croak("$@");
+    };
 
+    croak("$DBI::errstr") if $DBI::err;
+    
     return $result;
 }
 

@@ -48,10 +48,16 @@ sub login {
 
                 return $s->redirect_to('admin');
             } else {
-                return $s->render(template => 'admin/login', errors => {password => 'Invalid password'});
+                return $s->render(
+                    template => 'admin/login',
+                    errors => {password => 'Некорректынй пароль'}
+                );
             }
         } else {
-            return $s->render(template => 'admin/login', errors => {password => 'Invalid username'});
+            return $s->render(
+                template => 'admin/login',
+                errors => {username => 'Пользователь не найден'}
+            );
         }
     } else {
         return $s->render(template => 'admin/login');

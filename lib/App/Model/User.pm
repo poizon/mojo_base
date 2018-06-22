@@ -42,10 +42,4 @@ sub create {
     return $s->insert($sql, $values);
 }
 
-sub get_by_username {
-    my ($s, $username) = @_;
-
-    return $s->get_by(undef, {username => $username});
-}
-
 1;

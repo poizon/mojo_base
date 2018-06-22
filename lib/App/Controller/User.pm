@@ -12,7 +12,7 @@ sub authenticate {
     my $username = $s->param('username');
     my $password = $s->param('password');
 
-    if (my $u = $s->model('User')->get_by_username($username)) {
+    if (my $u = $s->model('User')->get_by(undef, {username => $username})) {
         if (md5_hex("$password" . $s->app->conf->{salt}) eq $u->{password}) {
 
             my $user_data = {

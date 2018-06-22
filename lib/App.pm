@@ -27,9 +27,9 @@ has db     => sub {
             "dbi:SQLite:dbname=$cfg->{default}->{db_name}",
             '', # no user
             '', # no passwd
-            { RaiseError => 1, sqlite_unicode => 1 }
+            { RaiseError => 1, PrintError => 1, AutoCommit => 1, sqlite_unicode => 1 }
         );
-    } or croak($@);
+    } or croak("$DBI::errstr");
 
     return $dbh;
 };
@@ -102,7 +102,7 @@ sub admin_routes {
     $users->get('/'                        )->to('admin-user#list'  )->name('admin_user_list');
     $users->get('/:id', [id => qr/\d+/x]   )->to('admin-user#detail')->name('admin_user_detail');
     $users->post('/:id', [id => qr/\d+/x]  )->to('admin-user#update')->name('admin_user_update');
-    $users->any('/new'                     )->to('admin-user#create')->name('admin_user_create');
+    $users->any(['GET', 'POST'] => '/new'  )->to('admin-user#create')->name('admin_user_create');
     $users->delete('/:id', [id => qr/\d+/x])->to('admin-user#remove')->name('admin_user_delete');
 
     # Pages

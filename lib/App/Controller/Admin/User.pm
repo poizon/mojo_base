@@ -109,3 +109,13 @@ sub remove {
 }
 
 1;
+
+__END__
+
+=encoding UTF-8
+
+=head1 NAME
+
+App::Controller::Admin::User - 
+
+=cut
