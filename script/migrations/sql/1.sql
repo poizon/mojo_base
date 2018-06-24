@@ -1,12 +1,8 @@
 --
--- COMMENT: Создание новой базы данных
----
+-- !Comment: Создание новой базы данных
+--
 
--- Создаем базу данных, если таковой еще нет
-CREATE DATABASE IF NOT EXISTS `mbasedb` CHARACTER SET utf8 COLLATE utf8_general_ci;
-CREATE USER 'mbase'@'localhost' IDENTIFIED BY 'qwerty';
-GRANT ALL PRIVILEGES ON mbasedb . * TO 'mbase'@'localhost';
-FLUSH PRIVILEGES;
+-- !Ups:
 
 -- Таблица с историей историей миграций
 CREATE TABLE IF NOT EXISTS `migrations` (
@@ -38,15 +34,22 @@ CREATE INDEX `uid__users_idx` ON `users` (`uid`);
 CREATE INDEX `email__users_idx` ON `users` (`email`);
 CREATE INDEX `username__users_idx` ON `users` (`username`);
 
--- Таблица сессий
-CREATE TABLE IF NOT EXISTS `sessions` (
+-- Таблица привилегий
+CREATE TABLE IF NOT EXISTS `permissions` (
 	   `id` INTEGER NOT NULL,
-	   `session_key` VARCHAR(32) NOT NULL UNIQUE,
-   	   `session_data` TEXT NULL,
-	   `expired` DATETIME NOT NULL,
-   	   PRIMARY KEY (`id`)
+	   `title` ENUM('regular', 'moderator'),
+	   `comment` VARCHAR(200),
+   	   UNIQUE (`title`),
+	   PRIMARY KEY (`id`)
 );
-CREATE INDEX `session_key__sessions_idx` ON `sessions` (`session_key`);
+
+-- Таблица привилегий пользователя
+CREATE TABLE IF NOT EXISTS `user_permissions` (
+       `user_id` INTEGER NOT NULL,
+	   `permission_id` INTEGER NOT NULL,
+   	   FOREIGN KEY (`user_id`) REFERENCES users(`id`) ON DELETE NO ACTION,
+   	   FOREIGN KEY (`permission_id`) REFERENCES permissions(`id`) ON DELETE NO ACTION
+);
 
 -- Таблица контентных страниц
 CREATE TABLE IF NOT EXISTS `pages` (
@@ -72,3 +75,11 @@ CREATE TABLE IF NOT EXISTS `stats` (
    	   PRIMARY KEY (`id`)
 );
 CREATE UNIQUE INDEX index_unique_on_a_and_b ON stats (`name`, `dt`);
+
+-- !Downs:
+
+DROP TABLE users;
+DROP TABLE permissions;
+DROP TABLE user_permissions;
+DROP TABLE pages;
+DROP TABLE stats;

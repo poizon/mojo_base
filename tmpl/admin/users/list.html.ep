@@ -18,30 +18,103 @@ title  'Пользователи';
 	<hr/>
 
 	<div class="row">
-		<div class="col-sm-6">
-			<button class="btn btn-sm btn-secondary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-				<i class="fa fa-filter" aria-hidden="true"></i> Фильтр
-			</button>
+		<div class="col-sm-8">
+			<a class="btn btn-sm btn-success" role="button" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+				<span class="glyphicon glyphicon-filter" aria-hidden="true"></span> Фильтр
+			</a>
 			<div class="collapse" id="collapseExample">
-				<div class="card card-body">
-				</div>
-			</div>
-		</div>
-		<div class="col-sm-6">
-			<div class="dropdown float-right">
-				<button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-					Поиск пользователя
-				</button>
-				<div class="dropdown-menu">
-					<form class="px-3 py-3">
-						<div class="form-group">
-							<label for="exampleDropdownFormEmail1">Поиск по имени или email</label>
-							<input type="email" class="form-control" id="exampleDropdownFormEmail1">
+				<br/>
+				<div class="well">
+					<form class="form-inline" action="" method="POST">
+						<div class="row margin-bottom-5">
+							<div class="col-sm-3"><strong>Роль:</strong></div>
+							<div class="col-sm-9">
+								<div class="form-group">
+									<select class="form-control input-sm">
+										<option value="regular" selected>regular</option>
+										<option value="admin">admin</option>
+										<option value="maintainer">maintainer</option>
+										<option value="writer">writer</option>
+										<option value="wiki_moderator">wiki_moderator</option>
+ 										<option value="pkg_moderator">pkg_moderator</option>
+									</select>
+								</div>
+							</div>
 						</div>
-						<button type="submit" class="btn btn-primary">Искать</button>
+						
+						<div class="row margin-bottom-5">
+							<div class="col-sm-3"><strong>Активирован:</strong></div>
+							<div class="col-sm-9">
+								<div class="form-group">
+									<input type="radio" class="form-control input-sm" id="" name="activated" value="all" selected checked/> Все
+								</div>
+								<div class="form-group margin-left-15">
+									<input type="radio" class="form-control input-sm" id="" name="activated" value="1" /> Да
+								</div>
+								<div class="form-group margin-left-15">
+									<input type="radio" class="form-control input-sm" id="" name="activated" value="0" /> Нет
+								</div>
+							</div>
+						</div>
+
+						<div class="row margin-bottom-5">
+							<div class="col-sm-3"><strong>Дата создания:</strong></div>
+							<div class="col-sm-9">
+								<div class="form-group">
+									<input type="text" class="form-control input-sm" id="filter-date-from" placeholder="С">
+								</div>
+								<div class="form-group margin-left-5">
+									<input type="text" class="form-control input-sm" id="filter-date-to" placeholder="По">
+								</div>
+							</div>
+						</div>
+
+						<div class="row margin-bottom-5">
+							<div class="col-sm-3"><strong>Сортировать по:</strong></div>
+							<div class="col-sm-9">
+								<div class="form-group">
+									<select class="form-control input-sm">
+										<option selected>По ID</option>
+										<option>По имени пользователя</option>
+										<option>По e-mail</option>
+										<option>По дате создания</option>
+									</select>
+								</div>
+								<div class="form-group margin-left-15">
+									<input type="radio" class="form-control input-sm" id="" name="sort" value="asc" selected checked/> ASC
+								</div>
+								<div class="form-group margin-left-15">
+									<input type="radio" class="form-control input-sm" id="" name="sort" value="desc" /> DESC
+								</div>
+							</div>
+						</div>
+
+						<div class="row margin-top-15">
+							<div class="col-sm-9 col-sm-offset-3">
+								<button class="btn btn-sm btn-info" type="submit">
+									<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Применить
+								</button>
+								<button class="btn btn-sm btn-default margin-left-15" type="button">
+									<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Сбросить фильтр
+								</button>
+							</div>
+						</div>
+
 					</form>
 				</div>
 			</div>
+		</div>
+		<div class="col-sm-4">
+			<form class="pull-right" action="" method="GET">
+				<div class="input-group">
+					<input id="search" class="form-control input-sm" type="text" name="search" placeholder="Поиск пользователя" value=""/>
+					<span class="input-group-btn">
+						<button class="btn btn-sm btn-default" type="submit">
+							<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+						</button>
+					</span>
+				</div>
+			</form>
 		</div>
 	</div>
 
@@ -101,8 +174,8 @@ title  'Пользователи';
 			<select class="form-control">
 				<option disabled selected>Действие над выбранными</option>
 				<option>Удалить</option>
-				<option>Сделать активными</option>
-				<option>Сделать неактивными</option>
+				<option>Активировать</option>
+				<option>Деактивировать</option>
 			</select>
 		</div>
 		<div class="col-sm-8">
@@ -154,13 +227,5 @@ title  'Пользователи';
 % end
 
 % content_for scripts => begin
-	<script type="text/javascript">
-	 $('#user-delete-modal').on('show.bs.modal',function(e){
-		 var modal = $(this);
-		 var btn = $(e.relatedTarget);
-		 modal.find('.modal-title').text('Подтверждение на удаление пользователя');
-		 modal.find('.modal-body p').text('Вы действительно хотите удалить пользователя '+btn.data('username')+'?');
-		 modal.find('.modal-footer a').attr('href', '/admin/users/'+btn.data('id')+'/delete/');
-	 })
-	</script>
+	<script src="/app/admin/js/user_list.js" type="text/javascript"></script>
 % end

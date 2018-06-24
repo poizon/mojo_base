@@ -2,6 +2,7 @@ package App;
 
 use Mojo::Base 'Mojolicious';
 
+use utf8;
 use strict;
 use warnings;
 
@@ -9,11 +10,10 @@ use DBI;
 use JSON::XS;
 use Mojo::Log;
 use Carp 'croak';
-use POSIX 'strftime';
 use App::Util 'extend';
 use Mojo::Util 'monkey_patch';
 
-our $VERSION = '0.0.17';
+our $VERSION = '0.0.18';
 
 has json   => sub { return JSON::XS->new->utf8; };
 has conf   => sub { return extend(do './conf/app.conf', do './conf/app-dev.conf'); };
@@ -29,7 +29,7 @@ has db     => sub {
             '', # no passwd
             { RaiseError => 1, PrintError => 1, AutoCommit => 1, sqlite_unicode => 1 }
         );
-    } or croak("$DBI::errstr");
+    } or croak("DATABASE_CONNECTION_ERROR: $DBI::errstr");
 
     return $dbh;
 };
@@ -63,16 +63,14 @@ sub startup {
 
     my $r = $app->routes;
 
-    # TODO: подумать над обновлением данных
     my $auth = $r->under(
         sub {
             my $s = shift;
 
-            if ($s->session('user_id') && $app->model('User')->check_by_id($s->session('user_id'))) {
-                return 1;
-            }
-
-            return $s->redirect_to('login');
+            return (
+                $s->session('user_id')
+                && $app->model('User')->check_by_id($s->session('user_id'))
+            ) or $s->redirect_to('login')
         }
     );
 
@@ -96,17 +94,19 @@ sub admin_routes {
 
     # Users
     my $users = $auth->under('/users');
-    $auth->get('/')->to('admin#admin_index')->name('admin');
+    $auth->get('/')->to('admin#admin_index' )->name('admin'       );
     $auth->get('/logout')->to('admin#logout')->name('admin_logout');
-    
+
     $users->get('/'                        )->to('admin-user#list'  )->name('admin_user_list');
     $users->get('/:id', [id => qr/\d+/x]   )->to('admin-user#detail')->name('admin_user_detail');
     $users->post('/:id', [id => qr/\d+/x]  )->to('admin-user#update')->name('admin_user_update');
     $users->any(['GET', 'POST'] => '/new'  )->to('admin-user#create')->name('admin_user_create');
     $users->delete('/:id', [id => qr/\d+/x])->to('admin-user#remove')->name('admin_user_delete');
 
+    # User permissions
+
     # Pages
-    $auth->get('/pages')->to('admin-pages#list')->name('admin_pages_list');
+    $auth->get('/pages'    )->to('admin-pages#list'  )->name('admin_pages_list'  );
     $auth->any('/pages/new')->to('admin-pages#create')->name('admin_pages_create');
 
     return;
