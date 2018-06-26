@@ -6,7 +6,7 @@
 
 CREATE TABLE IF NOT EXISTS `migrations` (
        `id` INTEGER NOT NULL,
-	   `name` VARCHAR(10) NOT NULL
+       `name` VARCHAR(10) NOT NULL
        `apply_script` TEXT NOT NULL,
        `revert_script` TEXT NOT NULL,
        `applied_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
