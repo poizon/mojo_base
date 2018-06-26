@@ -33,7 +33,7 @@ GetOptions(
     'initdb'             => \&initdb,
     'show-migrations'    => \&show_migrations,
     'migrate'            => \&migrate,
-    'revert-migration=i' => \&revert_migration,
+    'revert-migrations=i' => \&revert_migrations,
 );
 
 use constant COLORS  => {
@@ -50,7 +50,7 @@ use constant COLORS  => {
 sub initdb {
     my ($opt) = @_;
 
-    _clrprint(undef, ">> Initiation database...\n\n", 'green');
+    _clrprint(undef, "\n>> Initiation database...\n\n", 'green');
     
     my $sql = <<'EOF';
     CREATE TABLE IF NOT EXISTS `migrations` (
@@ -76,7 +76,7 @@ EOF
 sub show_migrations {
     my ($opt) = @_;
 
-    _clrprint(undef, ">> Show all applied migrations...\n\n", 'green');
+    _clrprint(undef, "\n>> Show all applied migrations...\n\n", 'green');
 
     my $migrations = $app->model('Base')->find_by(
         'SELECT name,applied_at,comment FROM migrations'
@@ -101,7 +101,7 @@ sub show_migrations {
 sub migrate {
     my ($opt) = @_;
 
-    _clrprint(undef, ">> Aplly all new migrations...\n\n", 'green');
+    _clrprint(undef, "\n>> Apply all new migrations...\n\n", 'green');
 
     my $migrations_path = File::Spec->catfile('script', 'migrations');
 
@@ -205,12 +205,61 @@ sub migrate {
     exit;
 }
 
+sub revert_migrations {
+    my ($opt, $value) = @_;
+
+    _clrprint(undef, "\n>> Revert migrations to $value steps...\n\n", 'green');
+
+    my $migrations = $app->db->selectall_arrayref(
+        'SELECT id,name,applied_at,comment,revert_script FROM migrations ORDER BY applied_at DESC, id DESC LIMIT ?',
+        {Slice=>{}},
+        $value
+    );
+
+    unless ($migrations) {
+        _clrprint(undef, "--- No migrations for revert ---\n", 'white');
+        exit;
+    }
+
+    for my $migration (@$migrations) {
+        _clrprint(
+            'reverting',
+            "$migration->{name}\t$migration->{applied_at}\t$migration->{comment}... ",
+            'white'
+        );
+
+        $app->model('Base')->transaction_begin();
+
+        my $was_reverted = 0;
+        
+        eval {
+            $app->model('Base')->raw_do($_) for (split /;/, $migration->{revert_script});
+            $was_reverted = $app->model('Base')->raw_execute(
+                'DELETE FROM migrations WHERE id = ?',
+                undef,
+                $migration->{id}
+            );
+            $app->model('Base')->commit();
+        } or do {
+            $app->model('Base')->rollback();
+        };
+
+        if ($was_reverted) {
+            _clrprint(undef, "OK\n", 'green');
+        } else {
+            _clrprint(undef, "FAILED\n", 'red');
+        }
+    }
+    
+    exit;
+}
+
 sub create_user {
     my ($opt, $value) = @_;
 
     my $is_admin = $value && $value == 1;
 
-    _clrprint(undef, ">> Creating ".($is_admin ? 'admin user' : 'regular user')."...\n\n", 'green');
+    _clrprint(undef, "\n>> Creating ".($is_admin ? 'admin user' : 'regular user')."...\n\n", 'green');
 
     my $username = _input('Enter username: ');
     my $email    = _input('Enter email: ');
