@@ -55,7 +55,7 @@ sub initdb {
     my $sql = <<'EOF';
     CREATE TABLE IF NOT EXISTS `migrations` (
        `id` INTEGER NOT NULL,
-       `name` VARCHAR(10) NOT NULL,
+       `name` VARCHAR(10) NOT NULL UNIQUE,
        `apply_script` TEXT NOT NULL,
        `revert_script` TEXT NOT NULL,
        `applied_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -115,44 +115,73 @@ sub migrate {
     closedir($dh);
 
     unless (@$files) {
-        _clrprint(undef, "--- Migrations not found ---\n", 'white');
+        _clrprint(undef, "--- Migrations diretory is empty ---\n", 'white');
         exit;
     }
 
-    my $last_applied_migration = $app->db->selectrow_hashref(
-        'SELECT name,applied_at,comment FROM migrations ORDER BY id DESC LIMIT 1',
-        undef
-    );
+    # Если имеются ранее примененные миграйии - искючаем их из списка
+    my $new_migrations = [];
 
-    if ($last_applied_migration) {
-        
-    } else {
-        for my $f (@$files) {
-            _clrprint('applying', "$f... ", 'white');
+    if (
+        my $applied_migration = $app->db->selectall_arrayref(
+            'SELECT name FROM migrations', {Slice=>{}}
+        )
+    ) {
+        my %applied_migration = map {$_->{name} => 1} @$applied_migration;
+        for (@$files) {
+            push @$new_migrations, $_ unless exists $applied_migration{$_};
+        }
+    }
 
-            open(my $fh, '<:encoding(UTF-8)', File::Spec->catfile($migrations_path, $f));
-            $/ = undef;
-            my $data = <$fh>;
-            close $fh;
+    unless (@$new_migrations) {
+        _clrprint(undef, "--- No new migrations found ---\n", 'white');
+        exit;
+    }
 
-            my ($comment) = $data =~ /!Comment:\s+(.+)$/gmx,
+    # Применяем новые миграции
+    for my $migration (sort {$a cmp $b } @$new_migrations) {
+        _clrprint('applying', "$migration... ", 'white');
+
+        open(my $fh, '<:encoding(UTF-8)', File::Spec->catfile($migrations_path, $migration));
+        $/ = undef;
+        my $data = <$fh>;
+        close $fh;
+
+        my ($comment) = $data =~ /!Comment:\s+(.+)$/gmx;
+
+        unless ($comment) {
+            _clrprint(undef, "FAILED\n\n", 'red');
+            _clrprint(undef, "Comment is required attribute!\n", 'white');
+            exit 1;
+        }
             
-            my ($apply_script) = $data =~ /\!Apply:\s?(.+)\--\s?!Revert:/sx;
-            $apply_script =~ s/^\s*\n//mg;
+        my ($apply_script) = $data =~ /\!Apply:\s?(.+)\--\s?!Revert:/sx;
+        $apply_script =~ s/^\s*\n//mg;
 
-            my ($revert_script) = $data =~ /\!Revert:\s?(.+)/sx;
-            $revert_script =~ s/^\s*\n//mg;
+        unless ($apply_script) {
+            _clrprint(undef, "FAILED\n\n", 'red');
+            _clrprint(undef, "Apply sql-script is required!\n", 'white');
+            exit 1;
+        }
 
-            my $is_inserted = $app->model('Base')->insert(
-                'INSERT INTO migrations (name,apply_script,revert_script,comment) VALUES (?,?,?,?)',
-                [$f, $apply_script, $revert_script, $comment]
-            );
+        my ($revert_script) = $data =~ /\!Revert:\s?(.+)/sx;
+        $revert_script =~ s/^\s*\n//mg;
 
-            if ($is_inserted) {
-                _clrprint(undef, "OK\n", 'green');
-            } else {
-                _clrprint(undef, "FAILED\n", 'red');
-            }
+        unless ($revert_script) {
+            _clrprint(undef, "FAILED\n\n", 'red');
+            _clrprint(undef, "Revert sql-script is required!\n", 'white');
+            exit 1;
+        }
+            
+        my $is_inserted = $app->model('Base')->insert(
+            'INSERT INTO migrations (name,apply_script,revert_script,comment) VALUES (?,?,?,?)',
+            [$migration, $apply_script, $revert_script, $comment]
+        );
+
+        if ($is_inserted) {
+            _clrprint(undef, "OK\n", 'green');
+        } else {
+            _clrprint(undef, "FAILED\n", 'red');
         }
     }
 

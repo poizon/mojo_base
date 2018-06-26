@@ -13,7 +13,7 @@ use Carp 'croak';
 use App::Util 'extend';
 use Mojo::Util 'monkey_patch';
 
-our $VERSION = '0.0.19';
+our $VERSION = '0.0.20';
 
 has json  => sub { return JSON::XS->new->utf8; };
 has conf  => sub { return extend(do './conf/app.conf', do './conf/app-dev.conf'); };
@@ -67,10 +67,11 @@ sub startup {
         sub {
             my $s = shift;
 
-            return (
-                $s->session('user_id')
-                && $app->model('User')->check_by_id($s->session('user_id'))
-            ) or $s->redirect_to('login')
+            my $is_auth = $s->session('user_id')
+                && $app->model('User')->check_by_id($s->session('user_id'));
+
+            return $s->redirect_to('login') unless $is_auth;
+            return $is_auth;
         }
     );
 
