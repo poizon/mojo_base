@@ -13,12 +13,12 @@ use Carp 'croak';
 use App::Util 'extend';
 use Mojo::Util 'monkey_patch';
 
-our $VERSION = '0.0.18';
+our $VERSION = '0.0.19';
 
-has json   => sub { return JSON::XS->new->utf8; };
-has conf   => sub { return extend(do './conf/app.conf', do './conf/app-dev.conf'); };
-has logger => sub { return Mojo::Log->new(level => 'debug', path => 'logs/dev.log'); };
-has db     => sub {
+has json  => sub { return JSON::XS->new->utf8; };
+has conf  => sub { return extend(do './conf/app.conf', do './conf/app-dev.conf'); };
+has debug => sub { return Mojo::Log->new(level => 'debug', path => 'logs/dev.log'); };
+has db    => sub {
     my $s   = shift;
     my $cfg = $s->conf->{db};
     

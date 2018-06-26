@@ -27,7 +27,7 @@ sub insert {
     my ($s, $query, $values) = @_;
 
     my $sth = $s->db->prepare($query);
-    my $result = eval { $sth->execute(@$values) } or croak("$@");
+    my $result = eval { $sth->execute(@$values) } or croak($@);
 
     return $result;
 }

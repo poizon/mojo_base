@@ -4,16 +4,6 @@
 
 -- !Apply:
 
-CREATE TABLE IF NOT EXISTS `migrations` (
-       `id` INTEGER NOT NULL,
-       `name` VARCHAR(10) NOT NULL
-       `apply_script` TEXT NOT NULL,
-       `revert_script` TEXT NOT NULL,
-       `applied_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-       `comment` VARCHAR(250),
-       PRIMARY KEY (`id`)
-);
-
 CREATE TABLE IF NOT EXISTS `users` (
        `id` INTEGER NOT NULL,
        `username` VARCHAR(50) NOT NULL UNIQUE,

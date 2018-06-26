@@ -12,24 +12,28 @@ use utf8;
 use strict;
 use warnings;
 
-use lib 'scripts/lib';
-
+use Data::Dumper;
 use Getopt::Long;
-use Carp qw(carp croak);
+use Carp qw(croak);
 use Term::ANSIColor qw(:constants);
+
+use lib 'lib';
+use App;
+
+my $app = App->new();
 
 Getopt::Long::Configure('no_ignore_case');
 
 GetOptions(
     # users
-    'create-user=i'       => \&create_user,
-    'set-user-password=s' => \&set_user_password,
+    'create-user=i' => \&create_user,
 
     # migrations
-    'show-migrations'  => \&show_migrations,
-    'migrate-up'       => \&migrate_up,
-    'migrate-down=i'   => \&migrate_down,
-) or croak('Invalid command');
+    'initdb'          => \&initdb,
+    'show-migrations' => \&show_migrations,
+    'apply-script'    => \&migrate_up,
+    'revert-script=i' => \&migrate_down,
+);
 
 use constant COLORS  => {
     red     => RED,
@@ -42,34 +46,81 @@ use constant COLORS  => {
     brown   => BLUE
 };
 
+sub initdb {
+    my ($opt) = @_;
+
+    _clrprint(undef, ">> Initiation database...\n\n", 'green');
+    
+    my $sql = <<'EOF';
+    CREATE TABLE IF NOT EXISTS `migrations` (
+       `id` INTEGER NOT NULL,
+       `name` VARCHAR(10) NOT NULL,
+       `apply_script` TEXT NOT NULL,
+       `revert_script` TEXT NOT NULL,
+       `applied_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+       `comment` VARCHAR(250),
+       PRIMARY KEY (`id`)
+    );
+EOF
+
+    unless ($app->model('Base')->raw_do($sql)) {
+        croak 'Error in migrations creation!';
+    }
+
+    _clrprint(undef, ">> OK\n\n", 'white');
+
+    exit;
+}
+
+sub show_migrations {
+    my ($opt) = @_;
+
+    _clrprint(undef, ">> Show all applied migrations...\n", 'green');
+
+    my $migrations = $app->model('Base')->find_by(
+        'SELECT name,applied_at,comment FROM migrations'
+    );
+
+    if (@$migrations) {
+        _clrprint(
+            undef,
+            "+++ $_->{name}\t$_->{applied_at}\t$_->{comment}\n", 'white'
+        ) for (@$migrations);
+    } else {
+        _clrprint(undef, "--- empty ---\n", 'white');
+    }
+
+    exit;
+}
+
 sub create_user {
     my ($opt, $value) = @_;
 
-    my $is_superuser = $value && $value == 1;
+    my $is_admin = $value && $value == 1;
 
-    _clrprint(undef, ">> Creating ".($is_superuser ? 'superuser' : 'user')."...\n\n", 'green');
+    _clrprint(undef, ">> Creating ".($is_admin ? 'admin user' : 'regular user')."...\n\n", 'green');
 
     my $username = _input('Enter username: ');
     my $email    = _input('Enter email: ');
     my $passwd   = _input('Enter password: ');
-    
-    croak('Password to long: '.length $passwd.' (max 32)') if length $passwd > 32;
 
-    my $passwd_confirm = input('Confirm password: ');
-    croak("\nError! Password missmatch!\n") if $passwd ne $passwd_confirm;
+    croak 'Password to short: '.length $passwd.' (min 8)' if length $passwd < 8;
+    croak 'Password to long: '.length $passwd.' (max 32)' if length $passwd > 32;
 
-    # my $result = add_user({
-    #     username     => substr($username, 0, 50),
-    #     email        => substr($email, 0, 50),
-    #     uid          => md5_hex($username.$email.time.$UID_SALT),
-    #     password     => md5_hex($passwd.$PAS_SALT),
-    #     is_activated => 1,
-    #     is_admin     => $value == 1 ? 1 : 0
-    # });
+    my $passwd_confirm = _input('Confirm password: ');
+    croak 'Error! Password missmatch!' if $passwd ne $passwd_confirm;
 
-    # croak("Failed user creation\n") unless ($result);
+    my $result = $app->model('User')->create({
+        email        => $email,
+        username     => $username,
+        password     => $passwd,
+        is_admin     => $is_admin,
+        is_activated => 1
+    });
 
-    _clrprint(undef, "\n>> User '$username' created successful\n\n", 'green');
+    croak 'Failed user creation' unless $result;
+
+    _clrprint(undef, "\n>> User '$username' created successful\n\n", 'white');
     
     exit;
 }
@@ -97,14 +148,34 @@ sub _clrprint {
     return 1;
 }
 
+1;
+
 __END__
 
 =head1 USAGE
 
-  carton exec script/manage.pl --create-user=i (1 - supersuer, 0 - refular user)
+  carton exec script/manage.pl --create-user=i (1 - supersuer, 0 - regular user)
 
 =head1 AUTHOR
 
 Peter Brovchenko <peter.brovchenko@gmail.ru>
+
+=head1 METHODS
+
+=over
+
+=item B<initdb>
+
+Создание базы данных и создание в ней таблицы миграций
+
+=item B<show_migrations>
+
+Вывод списка примененных миграций
+
+=item B<create_user>
+
+Создание пользователя
+
+=back
 
 =cut
