@@ -142,11 +142,13 @@ sub migrate {
     for my $migration (sort {$a cmp $b } @$new_migrations) {
         _clrprint('applying', "$migration... ", 'white');
 
+        # Открываем фал с миграцией на чтение
         open(my $fh, '<:encoding(UTF-8)', File::Spec->catfile($migrations_path, $migration));
         $/ = undef;
         my $data = <$fh>;
         close $fh;
 
+        # Парсим комментарий
         my ($comment) = $data =~ /!Comment:\s+(.+)$/gmx;
 
         unless ($comment) {
@@ -154,7 +156,8 @@ sub migrate {
             _clrprint(undef, "Comment is required attribute!\n", 'white');
             exit 1;
         }
-            
+
+        # Парсим sql-скрипт для upgrade'a
         my ($apply_script) = $data =~ /\!Apply:\s?(.+)\--\s?!Revert:/sx;
         $apply_script =~ s/^\s*\n//mg;
 
@@ -164,6 +167,7 @@ sub migrate {
             exit 1;
         }
 
+        # Парсим sql-скрипт для downgrade'a
         my ($revert_script) = $data =~ /\!Revert:\s?(.+)/sx;
         $revert_script =~ s/^\s*\n//mg;
 
@@ -172,13 +176,26 @@ sub migrate {
             _clrprint(undef, "Revert sql-script is required!\n", 'white');
             exit 1;
         }
-            
-        my $is_inserted = $app->model('Base')->insert(
-            'INSERT INTO migrations (name,apply_script,revert_script,comment) VALUES (?,?,?,?)',
-            [$migration, $apply_script, $revert_script, $comment]
-        );
 
-        if ($is_inserted) {
+        # TODO: накатываем миграции с транзакции
+        $app->model('Base')->transaction_begin();
+
+        my $was_applied = 0;
+        
+        eval {
+            $app->model('Base')->raw_do($_) for (split /;/, $apply_script);
+        
+            $was_applied = $app->model('Base')->insert(
+                'INSERT INTO migrations (name,apply_script,revert_script,comment) VALUES (?,?,?,?)',
+                [$migration, $apply_script, $revert_script, $comment]
+            );
+
+            $app->model('Base')->commit();
+        } or do {
+            $app->model('Base')->rollback();
+        };
+
+        if ($was_applied) {
             _clrprint(undef, "OK\n", 'green');
         } else {
             _clrprint(undef, "FAILED\n", 'red');

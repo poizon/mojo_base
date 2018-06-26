@@ -25,7 +25,7 @@ CREATE INDEX `username__users_idx` ON `users` (`username`);
 
 CREATE TABLE IF NOT EXISTS `permissions` (
        `id` INTEGER NOT NULL,
-       `title` ENUM('regular', 'moderator'),
+       `title` VARHAR(32) NOT NULL UNIQUE,
        `comment` VARCHAR(200),
        UNIQUE (`title`),
        PRIMARY KEY (`id`)

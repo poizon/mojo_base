@@ -23,6 +23,26 @@ sub app   { return shift->{app};   }
 sub db    { return shift->app->db; }
 sub table { return shift->{table}; }
 
+sub transaction_begin {
+    my $s = shift;
+    $s->db->{AutoCommit} = 0;
+    return;
+}
+
+sub commit {
+    my $s = shift;
+    $s->db->commit();
+    $s->db->{AutoCommit} = 1;
+    return;
+}
+
+sub rollback {
+    my $s = shift;
+    $s->db->rollback();
+    $s->db->{AutoCommit} = 1;
+    return;
+}
+
 sub insert {
     my ($s, $query, $values) = @_;
 
