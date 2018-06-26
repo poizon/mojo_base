@@ -76,17 +76,21 @@ EOF
 sub show_migrations {
     my ($opt) = @_;
 
-    _clrprint(undef, ">> Show all applied migrations...\n", 'green');
+    _clrprint(undef, ">> Show all applied migrations...\n\n", 'green');
 
     my $migrations = $app->model('Base')->find_by(
         'SELECT name,applied_at,comment FROM migrations'
     );
 
     if (@$migrations) {
+        _clrprint(undef, ('-' x 80)."\n", 'white');
+        
         _clrprint(
             undef,
             "+++ $_->{name}\t$_->{applied_at}\t$_->{comment}\n", 'white'
         ) for (@$migrations);
+        
+        _clrprint(undef, ('-' x 80)."\n", 'white');
     } else {
         _clrprint(undef, "--- empty ---\n", 'white');
     }
@@ -126,9 +130,29 @@ sub migrate {
         for my $f (@$files) {
             _clrprint('applying', "$f... ", 'white');
 
-            # TODO: код для накатывания миграции
+            open(my $fh, '<:encoding(UTF-8)', File::Spec->catfile($migrations_path, $f));
+            $/ = undef;
+            my $data = <$fh>;
+            close $fh;
+
+            my ($comment) = $data =~ /!Comment:\s+(.+)$/gmx,
             
-            _clrprint(undef, "OK\n", 'green');
+            my ($apply_script) = $data =~ /\!Apply:\s?(.+)\--\s?!Revert:/sx;
+            $apply_script =~ s/^\s*\n//mg;
+
+            my ($revert_script) = $data =~ /\!Revert:\s?(.+)/sx;
+            $revert_script =~ s/^\s*\n//mg;
+
+            my $is_inserted = $app->model('Base')->insert(
+                'INSERT INTO migrations (name,apply_script,revert_script,comment) VALUES (?,?,?,?)',
+                [$f, $apply_script, $revert_script, $comment]
+            );
+
+            if ($is_inserted) {
+                _clrprint(undef, "OK\n", 'green');
+            } else {
+                _clrprint(undef, "FAILED\n", 'red');
+            }
         }
     }
 
@@ -213,6 +237,10 @@ Peter Brovchenko <peter.brovchenko@gmail.ru>
 =item B<show_migrations>
 
 Вывод списка примененных миграций
+
+=item B<migrate>
+
+Применить все новые миграции
 
 =item B<create_user>
 
