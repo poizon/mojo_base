@@ -12,6 +12,7 @@ use utf8;
 use strict;
 use warnings;
 
+use File::Spec;
 use Data::Dumper;
 use Getopt::Long;
 use Carp qw(croak);
@@ -29,10 +30,10 @@ GetOptions(
     'create-user=i' => \&create_user,
 
     # migrations
-    'initdb'          => \&initdb,
-    'show-migrations' => \&show_migrations,
-    'apply-script'    => \&migrate_up,
-    'revert-script=i' => \&migrate_down,
+    'initdb'             => \&initdb,
+    'show-migrations'    => \&show_migrations,
+    'migrate'            => \&migrate,
+    'revert-migration=i' => \&revert_migration,
 );
 
 use constant COLORS  => {
@@ -88,6 +89,47 @@ sub show_migrations {
         ) for (@$migrations);
     } else {
         _clrprint(undef, "--- empty ---\n", 'white');
+    }
+
+    exit;
+}
+
+sub migrate {
+    my ($opt) = @_;
+
+    _clrprint(undef, ">> Aplly all new migrations...\n\n", 'green');
+
+    my $migrations_path = File::Spec->catfile('script', 'migrations');
+
+    opendir(my $dh, $migrations_path) or croak "Can not open directory $migrations_path: $@";
+
+    my $files = [ grep {
+        -f File::Spec->catfile($migrations_path, $_)
+        && $_ =~ /^.+\.sql$/mix
+    } readdir($dh) ];
+
+    closedir($dh);
+
+    unless (@$files) {
+        _clrprint(undef, "--- Migrations not found ---\n", 'white');
+        exit;
+    }
+
+    my $last_applied_migration = $app->db->selectrow_hashref(
+        'SELECT name,applied_at,comment FROM migrations ORDER BY id DESC LIMIT 1',
+        undef
+    );
+
+    if ($last_applied_migration) {
+        
+    } else {
+        for my $f (@$files) {
+            _clrprint('applying', "$f... ", 'white');
+
+            # TODO: код для накатывания миграции
+            
+            _clrprint(undef, "OK\n", 'green');
+        }
     }
 
     exit;
