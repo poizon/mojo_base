@@ -11,7 +11,8 @@ use Data::Dumper;
 sub list {
     my $s = shift;
     my $users = $s->model('User')->find_by(
-        'SELECT id,username,email,first_name,last_name,created,is_activated,is_admin FROM users LIMIT 100'
+        ['id','username','email','first_name','last_name','created','is_activated','is_admin'],
+        {limit => 100}
     );
     return $s->render(template => 'admin/users/list', users => $users);
 }

@@ -30,7 +30,7 @@ LEFT JOIN users AS u ON p.user_id = u.id
 LIMIT 100
 EOF
     
-    return $s->find_by($sql);
+    return $s->selectall($sql);
 }
 
 sub create {

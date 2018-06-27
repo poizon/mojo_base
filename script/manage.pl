@@ -64,7 +64,7 @@ sub initdb {
     );
 EOF
 
-    unless ($app->model('Base')->raw_do($sql)) {
+    unless ($app->model('Migration')->raw_do($sql)) {
         croak 'Error in migrations creation!';
     }
 
@@ -78,7 +78,7 @@ sub show_migrations {
 
     _clrprint(undef, "\n>> Show all applied migrations...\n\n", 'green');
 
-    my $migrations = $app->model('Base')->find_by(
+    my $migrations = $app->model('Migration')->find_by(
         'SELECT name,applied_at,comment FROM migrations'
     );
 
@@ -178,21 +178,21 @@ sub migrate {
         }
 
         # TODO: накатываем миграции с транзакции
-        $app->model('Base')->transaction_begin();
+        $app->model('Migration')->transaction_begin();
 
         my $was_applied = 0;
         
         eval {
-            $app->model('Base')->raw_do($_) for (split /;/, $apply_script);
+            $app->model('Migration')->raw_do($_) for (split /;/, $apply_script);
         
-            $was_applied = $app->model('Base')->insert(
+            $was_applied = $app->model('Migration')->insert(
                 'INSERT INTO migrations (name,apply_script,revert_script,comment) VALUES (?,?,?,?)',
                 [$migration, $apply_script, $revert_script, $comment]
             );
 
-            $app->model('Base')->commit();
+            $app->model('Migration')->commit();
         } or do {
-            $app->model('Base')->rollback();
+            $app->model('Migration')->rollback();
         };
 
         if ($was_applied) {
@@ -210,10 +210,13 @@ sub revert_migrations {
 
     _clrprint(undef, "\n>> Revert migrations to $value steps...\n\n", 'green');
 
-    my $migrations = $app->db->selectall_arrayref(
-        'SELECT id,name,applied_at,comment,revert_script FROM migrations ORDER BY applied_at DESC, id DESC LIMIT ?',
-        {Slice=>{}},
-        $value
+    my $migrations = $app->model('Migration')->find_by(
+        ['id', 'name', 'applied_at', 'comment', 'revert_script'],
+        {
+            order_by => [ ['applied_at' => 'DESC'], ['id' => 'DESC'] ],
+            limit    => '?'
+        },
+        [$value]
     );
 
     unless ($migrations) {
@@ -228,20 +231,16 @@ sub revert_migrations {
             'white'
         );
 
-        $app->model('Base')->transaction_begin();
+        $app->model('Migration')->transaction_begin();
 
         my $was_reverted = 0;
         
         eval {
-            $app->model('Base')->raw_do($_) for (split /;/, $migration->{revert_script});
-            $was_reverted = $app->model('Base')->raw_execute(
-                'DELETE FROM migrations WHERE id = ?',
-                undef,
-                $migration->{id}
-            );
-            $app->model('Base')->commit();
+            $app->model('Migration')->raw_do($_) for (split /;/, $migration->{revert_script});
+            $was_reverted = $app->model('Migration')->remove_by_id($migration->{id});
+            $app->model('Migration')->commit();
         } or do {
-            $app->model('Base')->rollback();
+            $app->model('Migration')->rollback();
         };
 
         if ($was_reverted) {
@@ -265,8 +264,8 @@ sub create_user {
     my $email    = _input('Enter email: ');
     my $passwd   = _input('Enter password: ');
 
-    croak 'Password to short: '.length $passwd.' (min 8)' if length $passwd < 8;
-    croak 'Password to long: '.length $passwd.' (max 32)' if length $passwd > 32;
+    croak 'Password too short: '.length $passwd.' (min 6)' if length $passwd < 6;
+    croak 'Password too long: '.length $passwd.' (max 32)' if length $passwd > 32;
 
     my $passwd_confirm = _input('Confirm password: ');
     croak 'Error! Password missmatch!' if $passwd ne $passwd_confirm;
@@ -336,6 +335,10 @@ Peter Brovchenko <peter.brovchenko@gmail.ru>
 =item B<migrate>
 
 Применить все новые миграции
+
+=item B<revert_migrations=i>
+
+Отменить ранее примененные миграции
 
 =item B<create_user>
 
