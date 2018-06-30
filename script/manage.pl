@@ -30,10 +30,10 @@ GetOptions(
     'create-user=i' => \&create_user,
 
     # migrations
-    'initdb'             => \&initdb,
-    'show-migrations'    => \&show_migrations,
-    'migrate'            => \&migrate,
-    'revert-migrations=i' => \&revert_migrations,
+    'initdb'          => \&initdb,
+    'show-migrations' => \&show_migrations,
+    'db-upgrade'      => \&db_upgrade,
+    'db-downgrade=i'  => \&db_downgrade,
 );
 
 use constant COLORS  => {
@@ -78,27 +78,27 @@ sub show_migrations {
 
     _clrprint(undef, "\n>> Show all applied migrations...\n\n", 'green');
 
-    my $migrations = $app->model('Migration')->find_by(
-        'SELECT name,applied_at,comment FROM migrations'
-    );
-
-    if (@$migrations) {
+    if (
+        my @migrations = @{ $app->model('Migration')->find_by(
+            ['name', 'applied_at', 'comment']
+        ) }
+    ) {
         _clrprint(undef, ('-' x 80)."\n", 'white');
         
         _clrprint(
             undef,
             "+++ $_->{name}\t$_->{applied_at}\t$_->{comment}\n", 'white'
-        ) for (@$migrations);
+        ) for (@migrations);
         
-        _clrprint(undef, ('-' x 80)."\n", 'white');
+        _clrprint(undef, ('-' x 80)."\n\n", 'white');
     } else {
-        _clrprint(undef, "--- empty ---\n", 'white');
+        _clrprint(undef, "--- empty ---\n\n", 'white');
     }
 
     exit;
 }
 
-sub migrate {
+sub db_upgrade {
     my ($opt) = @_;
 
     _clrprint(undef, "\n>> Apply all new migrations...\n\n", 'green');
@@ -177,7 +177,6 @@ sub migrate {
             exit 1;
         }
 
-        # TODO: накатываем миграции с транзакции
         $app->model('Migration')->transaction_begin();
 
         my $was_applied = 0;
@@ -202,10 +201,12 @@ sub migrate {
         }
     }
 
+    print "\n";
+    
     exit;
 }
 
-sub revert_migrations {
+sub db_downgrade {
     my ($opt, $value) = @_;
 
     _clrprint(undef, "\n>> Revert migrations to $value steps...\n\n", 'green');
@@ -249,6 +250,8 @@ sub revert_migrations {
             _clrprint(undef, "FAILED\n", 'red');
         }
     }
+
+    print "\n";
     
     exit;
 }
