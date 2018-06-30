@@ -21,6 +21,7 @@ use Term::ANSIColor qw(:constants);
 use lib 'lib';
 use App;
 
+
 my $app = App->new();
 
 Getopt::Long::Configure('no_ignore_case');
@@ -46,6 +47,41 @@ use constant COLORS  => {
     white   => WHITE,
     brown   => BLUE
 };
+
+sub create_user {
+    my ($opt, $value) = @_;
+
+    my $is_admin = $value && $value == 1;
+
+    _clrprint(undef, "\n>> Creating ".($is_admin ? 'admin user' : 'regular user')."...\n\n", 'green');
+
+    my $username = _input('Enter username: ');
+    my $email    = _input('Enter email: ');
+
+    croak 'Invalid email: '.$email unless $email =~ /^.+\@.+\..+$/mx;
+    
+    my $passwd   = _input('Enter password: ');
+
+    croak 'Password too short: '.length $passwd.' (min 6)' if length $passwd < 6;
+    croak 'Password too long: '.length $passwd.' (max 32)' if length $passwd > 32;
+
+    my $passwd_confirm = _input('Confirm password: ');
+    croak 'Error! Password missmatch!' if $passwd ne $passwd_confirm;
+
+    my $result = $app->model('User')->create({
+        email        => $email,
+        username     => $username,
+        password     => $passwd,
+        is_admin     => $is_admin,
+        is_activated => 1
+    });
+
+    croak 'Failed user creation' unless $result;
+
+    _clrprint(undef, "\n>> User '$username' created successful\n\n", 'white');
+    
+    exit;
+}
 
 sub initdb {
     my ($opt) = @_;
@@ -252,38 +288,6 @@ sub db_downgrade {
     }
 
     print "\n";
-    
-    exit;
-}
-
-sub create_user {
-    my ($opt, $value) = @_;
-
-    my $is_admin = $value && $value == 1;
-
-    _clrprint(undef, "\n>> Creating ".($is_admin ? 'admin user' : 'regular user')."...\n\n", 'green');
-
-    my $username = _input('Enter username: ');
-    my $email    = _input('Enter email: ');
-    my $passwd   = _input('Enter password: ');
-
-    croak 'Password too short: '.length $passwd.' (min 6)' if length $passwd < 6;
-    croak 'Password too long: '.length $passwd.' (max 32)' if length $passwd > 32;
-
-    my $passwd_confirm = _input('Confirm password: ');
-    croak 'Error! Password missmatch!' if $passwd ne $passwd_confirm;
-
-    my $result = $app->model('User')->create({
-        email        => $email,
-        username     => $username,
-        password     => $passwd,
-        is_admin     => $is_admin,
-        is_activated => 1
-    });
-
-    croak 'Failed user creation' unless $result;
-
-    _clrprint(undef, "\n>> User '$username' created successful\n\n", 'white');
     
     exit;
 }

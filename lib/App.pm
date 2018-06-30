@@ -13,11 +13,11 @@ use Carp 'croak';
 use App::Util 'extend';
 use Mojo::Util 'monkey_patch';
 
-our $VERSION = '0.0.23';
+our $VERSION = '0.0.24';
 
 has json  => sub { return JSON::XS->new->utf8; };
 has conf  => sub { return extend(do './conf/app.conf', do './conf/app-dev.conf'); };
-has debug => sub { return Mojo::Log->new(level => 'debug', path => 'logs/dev.log'); };
+has debug => sub { return Mojo::Log->new(level => 'debug', path => 'logs/debug.log'); };
 has db    => sub {
     my $s   = shift;
     my $cfg = $s->conf->{db};
@@ -42,7 +42,7 @@ sub startup {
     $app->max_request_size($app->conf->{max_request_size});
 
     $app->log(Mojo::Log->new({'level' => 'info', 'path' => 'logs/app.log'}));
-    $SIG{__WARN__} = sub { unshift @_, $app->log; goto &Mojo::Log::warn; };
+    # $SIG{__WARN__} = sub { unshift @_, $app->log; goto &Mojo::Log::warn; };
     
     $app->static->paths(['static']);
     $app->renderer->paths(['tmpl']);
