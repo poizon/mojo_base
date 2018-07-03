@@ -33,7 +33,7 @@ $ carton install
 
 ## Usage
 
-- `make run` - start developing web server (morbo)
+- `make run` - start development web server (morbo)
 - `make create-user` - add new regular user
 - `make create-superuser` - add new admin user
 - `make show-migrations` - show all applied sql migrations
