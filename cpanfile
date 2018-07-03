@@ -1,11 +1,11 @@
-requires 'perl'        => '==5.26.2';
+requires 'perl',                   '==5.26.2';
 
-requires 'Mojolicious' => '==7.85';
-requires 'JSON::XS';
-requires 'Time::Moment';
-requires 'DBI';
-requires 'DBD::SQLite';
-requires 'Geo::IP2Location::Lite';
+requires 'Mojolicious',            '==7.85';
+requires 'JSON::XS',               '==3.04';
+requires 'Time::Moment',           '==0.44';
+requires 'DBI',                    '==1.641';
+requires 'DBD::SQLite',            '==1.58';
+requires 'Geo::IP2Location::Lite', '==0.11';
 
 requires 'Test::PerlTidy';
 requires 'Test::Perl::Critic';

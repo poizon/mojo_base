@@ -245,8 +245,8 @@ DISTRIBUTIONS
       Data::Dumper 0
       ExtUtils::MakeMaker 0
       perl 5.008001
-  DBI-1.637
-    pathname: T/TI/TIMB/DBI-1.637.tar.gz
+  DBI-1.641
+    pathname: T/TI/TIMB/DBI-1.641.tar.gz
     provides:
       Bundle::DBI 12.008696
       DBD::DBM 0.08
@@ -281,6 +281,13 @@ DISTRIBUTIONS
       DBD::Gofer::db 0.015327
       DBD::Gofer::dr 0.015327
       DBD::Gofer::st 0.015327
+      DBD::Mem 0.001
+      DBD::Mem::DataSource 0.001
+      DBD::Mem::Statement 0.001
+      DBD::Mem::Table 0.001
+      DBD::Mem::db 0.001
+      DBD::Mem::dr 0.001
+      DBD::Mem::st 0.001
       DBD::NullP 12.014715
       DBD::NullP::db 12.014715
       DBD::NullP::dr 12.014715
@@ -295,7 +302,7 @@ DISTRIBUTIONS
       DBD::Sponge::dr 12.010003
       DBD::Sponge::st 12.010003
       DBDI 12.015129
-      DBI 1.637
+      DBI 1.641
       DBI::Const::GetInfo::ANSI 2.008697
       DBI::Const::GetInfo::ODBC 2.011374
       DBI::Const::GetInfoReturn 2.008697
@@ -335,7 +342,7 @@ DISTRIBUTIONS
       DBI::SQL::Nano::Table_ 1.015544
       DBI::Util::CacheMemory 0.010315
       DBI::Util::_accessor 0.009479
-      DBI::common 1.637
+      DBI::common 1.641
     requirements:
       ExtUtils::MakeMaker 6.48
       Test::Simple 0.90
@@ -1916,11 +1923,11 @@ DISTRIBUTIONS
       ExtUtils::MakeMaker 0
       constant 0
       perl 5.00503
-  Time-Moment-0.42
-    pathname: C/CH/CHANSEN/Time-Moment-0.42.tar.gz
+  Time-Moment-0.44
+    pathname: C/CH/CHANSEN/Time-Moment-0.44.tar.gz
     provides:
-      Time::Moment 0.42
-      Time::Moment::Adjusters 0.42
+      Time::Moment 0.44
+      Time::Moment::Adjusters 0.44
     requirements:
       Carp 0
       ExtUtils::MakeMaker 6.59
