@@ -1,4 +1,4 @@
-requires 'perl',                   '==5.26.2';
+requires 'perl',                   '==5.28.0';
 
 requires 'Mojolicious',            '==7.85';
 requires 'JSON::XS',               '==3.04';

@@ -39,53 +39,38 @@ sub insert {
     return $sth->execute(@$values);
 }
 
-sub remove_by_id {
-    my ($s, $id) = @_;
+sub remove {
+    my ($s, %where) = @_;
 
-    return 0 unless $id;
-    
-    my $sth = $s->db->prepare('DELETE FROM '.$s->table.' WHERE id=?');
-
-    return $sth->execute($id);
-}
-
-sub remove_by {
-    my ($s, $query, $data) = @_;
-
-    my $sql = 'DELETE FROM '.$s->table.' WHERE '.join(' AND ', map {"$_=?"} keys %$data);
-    my $sth = $s->db->prepare($sql);
-
-    return $sth->execute(values %$data);;
-}
-
-sub check_by_id {
-    my ($s, $id) = @_;
-
-    my $result = $s->db->selectrow_arrayref(
-        'SELECT 1 FROM '.$s->table.' WHERE id=?', undef, $id
+    my $sth = $s->db->prepare(
+        'DELETE FROM '.$s->table.' WHERE '.join(' AND ', map {"$_=?"} keys %where)
     );
 
-    return ($result && @$result && $result->[0] == 1);
+    return $sth->execute(values %where);
 }
 
-sub get_by_id {
-    my ($s, $id, $fields) = @_;
+sub is_exists {
+    my ($s, %where) = @_;
 
-    return 0 unless $id;
+    my $result = $s->db->selectrow_arrayref(
+        'SELECT 1 FROM '.$s->table.' WHERE '.join(' AND ', map {"$_=?"} keys %where),
+        undef,
+        values %where
+    );
+
+    return @$result && $result->[0];
+}
+
+sub get {
+    my ($s, $fields, %where) = @_;
 
     $fields = (($fields && @$fields) ? join ',', @$fields : '*');
 
-    return $s->db->selectrow_hashref(qq[SELECT $fields FROM ${\$s->table} WHERE id=?], undef, $id);
-}
-
-sub get_by {
-    my ($s, $fields, $data) = @_;
-
-    $fields = (($fields && @$fields) ? join ',', @$fields : '*');
-
-    my $sql = "SELECT $fields FROM ".$s->table." WHERE ".join(' AND ', map {"$_=?"} keys %$data);
-
-    return $s->db->selectrow_hashref($sql, undef, values %$data);
+    return $s->db->selectrow_hashref(
+        "SELECT $fields FROM $s->table WHERE ".join(' AND ', map {"$_=?"} keys %where),
+        undef,
+        values %where
+    );
 }
 
 sub update_by_id {
@@ -116,30 +101,18 @@ sub raw_execute {
     return $sth->execute((ref $bind_values eq 'ARRAY') ? @$bind_values : $bind_values);
 }
 
-sub selectall {
-    my ($s, $query, $params, $bind_values) = @_;
+sub find {
+    my ($s, $fields, $params) = @_;
 
-    $params //= {Slice=>{}};
+    return unless $params && $params->{where} && %{$params->{where}};
 
-    return $s->db->selectall_hashref(
-        $query,
-        $params,
-        (ref $bind_values eq 'ARRAY') ? @$bind_values : $bind_values
-    );
-}
-
-sub find_by {
-    my ($s, $fields, $params, $bind_values) = @_;
-
+    my @bind_values = values %{$params->{where}};
+    
     $fields = (($fields && @$fields) ? join ',', @$fields : '*');
 
-    my $sql = "SELECT $fields FROM ".$s->table;
+    my $sql = "SELECT $fields FROM $s->table WHERE " . join(' AND ', map {"$_=?"} keys %{$params->{where}});
 
-    if ($params->{where}) {
-        $sql .= " WHERE ".$params->{where};
-    }
-
-    if ($params->{order_by} && @{$params->{order_by}}) {
+    if ($params->{order_by} && %{$params->{order_by}}) {
         $sql .= ' ORDER BY ';
         my $orders = [];
         push @$orders, join(' ', @$_) for ( @{$params->{order_by}} );
@@ -147,14 +120,11 @@ sub find_by {
     }
 
     if ($params->{limit}) {
-        $sql .= ' LIMIT '.$params->{limit};
+        $sql .= ' LIMIT ?';
+        push @bind_values, $params->{limit};
     }
 
-    if (defined $bind_values && @$bind_values) {
-        return $s->db->selectall_arrayref($sql, {Slice=>{}}, @$bind_values);
-    } else {
-        return $s->db->selectall_arrayref($sql, {Slice=>{}});
-    }
+    return $s->db->selectall_arrayref($sql, {Slice=>{}}, @bind_values);
 }
 
 sub transaction_begin {
@@ -191,9 +161,19 @@ Peter Brovchenko <peter.brovchenko@gmail.ru>
 
 =over
 
-=item B<initdb>
+=item B<new>
 
 Создание базы данных и создание в ней таблицы миграций
+
+=back
+
+=item B<insert>
+
+
+=back
+
+=item B<insert>
+
 
 =back
 

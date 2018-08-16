@@ -13,7 +13,7 @@ use Carp 'croak';
 use App::Util 'extend';
 use Mojo::Util 'monkey_patch';
 
-our $VERSION = '0.0.25';
+our $VERSION = '0.1.0.1';
 
 has json  => sub { return JSON::XS->new->utf8; };
 has conf  => sub { return extend(do './conf/app.conf', do './conf/app-dev.conf'); };
@@ -42,7 +42,6 @@ sub startup {
     $app->max_request_size($app->conf->{max_request_size});
 
     $app->log(Mojo::Log->new({'level' => 'info', 'path' => 'logs/app.log'}));
-    # $SIG{__WARN__} = sub { unshift @_, $app->log; goto &Mojo::Log::warn; };
     
     $app->static->paths(['static']);
     $app->renderer->paths(['tmpl']);
@@ -53,7 +52,7 @@ sub startup {
 
     $app->plugin('App::Helpers');
 
-    # Replace default JSON parser with JSON::XS
+    # Replace default JSON parser (JSON::PP) on JSON::XS
     monkey_patch "Mojo::JSON", encode => sub { return $app->json->encode( $_[1] ); };
     monkey_patch "Mojo::JSON", decode => sub { return $app->json->decode( $_[1] ); };
     monkey_patch "Mojo::JSON", j      => sub {
@@ -99,7 +98,7 @@ sub admin_routes {
     $auth->get('/logout')->to('admin#logout')->name('admin_logout');
 
     $users->get('/'                        )->to('admin-user#list'  )->name('admin_user_list');
-    $users->get('/:id', [id => qr/\d+/x]   )->to('admin-user#detail')->name('admin_user_detail');
+    $users->get('/:id',  [id => qr/\d+/x]  )->to('admin-user#detail')->name('admin_user_detail');
     $users->post('/:id', [id => qr/\d+/x]  )->to('admin-user#update')->name('admin_user_update');
     $users->any(['GET', 'POST'] => '/new'  )->to('admin-user#create')->name('admin_user_create');
     $users->delete('/:id', [id => qr/\d+/x])->to('admin-user#remove')->name('admin_user_delete');
