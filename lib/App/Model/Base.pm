@@ -8,12 +8,13 @@ App::Model::Base - Базовая модель, которую наследую�
 
 package App::Model::Base;
 
+use utf8;
 use strict;
 use warnings;
-use DBI;
-use Data::Dumper;
 
+use DBI;
 use Carp 'croak';
+
 
 sub new {
     my ($class, %args) = @_;
@@ -87,18 +88,14 @@ sub update_by_id {
 }
 
 sub raw_do {
-    my ($s, $query) = @_;
-    return $s->db->do($query)
+    my ($s, $sql) = @_;
+    return $s->db->do($sql)
 }
 
 sub raw_execute {
-    my ($s, $query, $params, $bind_values) = @_;
-
-    $params //= {};
-        
-    my $sth = $s->db->prepare($query, $params);
-    
-    return $sth->execute((ref $bind_values eq 'ARRAY') ? @$bind_values : $bind_values);
+    my ($s, $sql, $params, @bind_values) = @_;
+    my $sth = $s->db->prepare($sql, $params);
+    return $sth->execute(@bind_values);
 }
 
 sub find {
