@@ -114,9 +114,7 @@ sub find {
 
     if ($params->{order_by} && %{$params->{order_by}}) {
         $sql .= ' ORDER BY ';
-        my $orders = [];
-        push @$orders, join(' ', @$_) for ( @{$params->{order_by}} );
-        $sql .= join(', ', @$orders);
+        $sql .= join ',', map {"$_ $params->{order_by}->{$_}"} keys %{$params->{order_by}};
     }
 
     if ($params->{limit}) {
@@ -124,6 +122,11 @@ sub find {
         push @bind_values, $params->{limit};
     }
 
+    if ($params->{offset}) {
+        $sql .= ' OFFSET ?';
+        push @bind_values, $params->{offset};
+    }
+    
     return $s->db->selectall_arrayref($sql, {Slice=>{}}, @bind_values);
 }
 
