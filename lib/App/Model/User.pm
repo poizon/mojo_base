@@ -26,8 +26,8 @@ sub new {
 sub create {
     my ($s, $data) = @_;
 
+    $data->{uid}      = $s->_generate_uid($data->{email}.$data->{username});
     $data->{password} = md5_hex('' . $data->{password} . $s->app->conf->{salt});
-    $data->{uid}      = md5_hex('' . $data->{email} . $data->{username} . time . $s->app->conf->{salt});
 
     my @values;
     my $fields = [keys %$data];
@@ -41,6 +41,12 @@ sub create {
     push @values, $data->{$_} for (@$fields);
 
     return $s->insert($sql, @values);
+}
+
+sub _generate_uid {
+    my ($s, $value) = @_;
+    return unless $value;
+    return md5_hex($value . time . $s->app->conf->{salt})
 }
 
 1;
