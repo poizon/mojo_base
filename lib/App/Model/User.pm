@@ -7,6 +7,7 @@ use warnings;
 
 use Carp 'croak';
 use Digest::MD5 qw(md5_hex);
+use Digest::SHA qw(sha256_hex);
 
 
 sub new {
@@ -18,6 +19,7 @@ sub new {
     };
 
     bless $self, $class;
+
     return $self;
 }
 
@@ -27,19 +29,18 @@ sub create {
     $data->{password} = md5_hex('' . $data->{password} . $s->app->conf->{salt});
     $data->{uid}      = md5_hex('' . $data->{email} . $data->{username} . time . $s->app->conf->{salt});
 
-    my $values = [];
-    my $fields = [ keys %$data ];
+    my @values;
+    my $fields = [keys %$data];
 
-    my $sql =
-          'INSERT INTO '
+    my $sql = 'INSERT INTO '
         . $s->table . ' ('
         . (join ',', @$fields) . ')'
         . ' VALUES ('
         . (join ',', ('?') x @$fields) . ')';
 
-    push @$values, $data->{$_} for (@$fields);
+    push @values, $data->{$_} for (@$fields);
 
-    return $s->insert($sql, $values);
+    return $s->insert($sql, @values);
 }
 
 1;

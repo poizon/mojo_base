@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-App::Model::Base - Базовая модель, которую наследуют все остальные модели
+App::Model::Base - Базовая модель, для наследования остальными моделями
 
 =cut
 
@@ -25,6 +25,7 @@ sub new {
     };
 
     bless $self, $class;
+
     return $self;
 }
 
@@ -33,11 +34,11 @@ sub db    { return shift->app->db; }
 sub table { return shift->{table}; }
 
 sub insert {
-    my ($s, $query, $values) = @_;
+    my ($s, $sql, @bind_values) = @_;
 
-    my $sth = $s->db->prepare($query);
+    my $sth = $s->db->prepare($sql);
 
-    return $sth->execute(@$values);
+    return $sth->execute(@bind_values);
 }
 
 sub remove {
@@ -151,30 +152,103 @@ sub rollback {
 
 __END__
 
-=head1 USAGE
-
 =head1 AUTHOR
 
 Peter Brovchenko <peter.brovchenko@gmail.ru>
 
 =head1 METHODS
 
-=over
+=cut
 
-=item B<new>
+=head2 B<new>($class, %args)
 
-Создание базы данных и создание в ней таблицы миграций
+Создать новый инстанс базовой модели.
 
-=back
+  %args - набор произвольных аргументов
 
-=item B<insert>
+=cut
 
+=head2 B<insert>($s, $sql, @bind_values)
 
-=back
+Сделать новую запись в базу.
 
-=item B<insert>
+  $sql         - SQL-запрос
+  @bind_values - значения для использования в placeholder's
 
+=cut
 
-=back
+=head2 B<remove>($s, %where)
+
+Удалить запись из базы.
+
+  %where - условия выборки
+
+=cut
+
+=head2 B<is_exists>($s, %where)
+
+Проверить существование записи.
+
+  %where - условия выборки
+
+=cut
+
+=head2 B<get>($s, $fields, %where)
+
+Выбрадь одну запись из базы.
+
+  $fields - список полей для выборки
+  %where  - условия выборки
+
+=cut
+
+=head2 B<raw_do>($s, $sql)
+
+Выполнить произвольный запрос к базе.
+
+  $sql - SQL-запрос
+
+=cut
+
+=head2 B<raw_execute>($s, $sql, $params, @bind_values)
+
+Выполнить произвольный запрос к базе и получить результат его выполнения
+
+  $sql         - SQL-запрос
+  $params      - параметры для execute
+  @bind_values - значения для использования в placeholder's
+
+=cut
+
+=head2 B<find>($s, $fields, $params)
+
+Сделать выборку записей из базы.
+
+  $fields - список полей для выборки
+  $params - параметры для запроса
+    $params->{where}    - условия выборки
+    $params->{order_by} - параметры сортировки
+    $params->{limit}    - LIMIT
+    $params->{offset}   - OFFSET
+
+  @bind_values - значения для использования в placeholder's
+
+=cut
+
+=head2 B<transaction_begin>
+
+Начать транзакцию.
+
+=cut
+
+=head2 B<commit>
+
+Завершить транзакцию.
+
+=cut
+
+=head2 B<rollback>
+
+Откатить транзакцию.
 
 =cut

@@ -4,9 +4,8 @@ use base App::Model::Base;
 
 use strict;
 use warnings;
-use Time::Moment;
 
-use Data::Dumper;
+use Time::Moment;
 
 sub new {
     my ($class, %args) = @_;
@@ -24,10 +23,11 @@ sub new {
     };
 
     bless $self, $class;
+
     return $self;
 }
 
-sub inc_stats {
+sub inc {
     my ($s, $name, $value) = @_;
 
     return 0 unless $s->_check_name($name);
@@ -35,14 +35,15 @@ sub inc_stats {
     $value //= 1;
 
     my $sql = <<'EOF';
-INSERT INTO stats (name,value,dt) VALUES (?,?,?)
-ON DUPLICATE KEY UPDATE value=value+?
+      INSERT INTO stats (name, value, dt)
+                 VALUES (?, ?, ?)
+ON DUPLICATE KEY UPDATE value = value + ?
 EOF
 
-    return $s->_upsert_stats($sql, $name, $value);
+    return $s->_upsert($sql, $name, $value);
 }
 
-sub dec_stats {
+sub dec {
     my ($s, $name, $value) = @_;
     
     return 0 unless $s->_check_name($name);
@@ -50,28 +51,30 @@ sub dec_stats {
     $value //= 1;
     
     my $sql = <<'EOF';
-INSERT INTO stats (name,value,dt) VALUES (?,?,?)
-ON DUPLICATE KEY UPDATE value=value-?
+      INSERT INTO stats (name, value, dt)
+                 VALUES (?, ?, ?)
+ON DUPLICATE KEY UPDATE value = value - ?
 EOF
 
-    return $s->_upsert_stats($sql, $name, $value);
+    return $s->_upsert($sql, $name, $value);
 }
 
-sub set_stats {
+sub set {
     my ($s, $name, $value) = @_;
 
     return 0 unless $s->_check_name($name);
     return 0 unless $value;
 
     my $sql = <<'EOF';
-INSERT INTO stats (name,value,dt) VALUES (?,?,?)
-ON DUPLICATE KEY UPDATE value=?
+      INSERT INTO stats (name, value, dt)
+                 VALUES (?, ?, ?)
+ON DUPLICATE KEY UPDATE value = ?
 EOF
 
-    return $s->_upsert_stats($sql, $name, $value);
+    return $s->_upsert($sql, $name, $value);
 }
 
-sub _upsert_stats {
+sub _upsert {
     my ($s, $sql, $name, $value) = @_;
 
     my $dt = Time::Moment

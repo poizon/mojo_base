@@ -18,37 +18,39 @@ sub new {
     };
 
     bless $self, $class;
+
     return $self;
 }
 
-sub get_all {
+sub all_with_user {
     my $s = shift;
+
     my $sql = <<'EOF';
 SELECT p.id, p.title, p.body, p.dt_created, p.dt_modified, u.id AS user_id, u.username, u.email
-FROM pages AS p
-LEFT JOIN users AS u ON p.user_id = u.id
-LIMIT 100
+  FROM pages AS p
+       LEFT JOIN users AS u
+       ON p.user_id = u.id
+ LIMIT 100
 EOF
-    
-    return $s->selectall($sql);
+
+    return $s->db->selectall_arrayref($sql, {Slice=>{}});
 }
 
 sub create {
     my ($s, $data) = @_;
 
-    my $values = [];
-    my $fields = [ keys %$data ];
+    my @values;
+    my $fields = [keys %$data];
 
-    my $sql =
-          'INSERT INTO '
+    my $sql = 'INSERT INTO '
         . $s->table . ' ('
         . (join ',', @$fields) . ')'
         . ' VALUES ('
         . (join ',', ('?') x @$fields) . ')';
 
-    push @$values, $data->{$_} for (@$fields);
+    push @values, $data->{$_} for (@$fields);
 
-    return $s->insert($sql, $values);
+    return $s->insert($sql, @values);
 }
 
 1;
