@@ -1,11 +1,3 @@
-=encoding UTF-8
-
-=head1 NAME
-
-App::Model::Base - Базовая модель, для наследования остальными моделями
-
-=cut
-
 package App::Model::Base;
 
 use utf8;
@@ -150,11 +142,48 @@ sub rollback {
 
 1;
 
-__END__
+=encoding UTF-8
 
-=head1 AUTHOR
+=head1 NAME
 
-Peter Brovchenko <peter.brovchenko@gmail.ru>
+App::Model::Base - Базовая модель, для наследования остальными моделями
+
+=head1 SYNOPSIS
+
+  use base App::Model::Base;
+  sub new {
+    my ($class, %args) = @_;
+
+    my $self = {
+        app   => $args{app},
+        table => 'some_table_name'
+    };
+
+    bless $self, $class;
+
+    return $self;
+  }
+
+=head1 DESCRIPTION
+
+L<App::Model::Base> 
+validation checks.
+
+=head1 ATTRIBUTES
+
+L<App::Model::Base> содержит следующий атрибуты
+
+=head2 B<app>
+
+implements the following attributes.
+
+=head2 B<db>
+
+implements the following attributes.
+
+=head2 B<table>
+
+implements the following attributes.
 
 =head1 METHODS
 
@@ -250,5 +279,9 @@ Peter Brovchenko <peter.brovchenko@gmail.ru>
 =head2 B<rollback>
 
 Откатить транзакцию.
+
+=head1 AUTHOR
+
+Peter Brovchenko <peter.brovchenko@gmail.ru>
 
 =cut
