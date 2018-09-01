@@ -50,7 +50,7 @@ sub register {
     $app->helper(
         get_ip => sub {
             my $self = shift;
-            my $ip = $self->req->headers->header('X-Real-IP');
+            my $ip   = $self->req->headers->header('X-Real-IP');
             return $ip || ($self->tx->remote_address || '0.0.0.0');
         }
     );
@@ -58,11 +58,11 @@ sub register {
     $app->helper(
         get_ip_info => sub {
             my ($self, $ip) = @_;
-            my $obj = Geo::IP2Location::Lite->open('bin/IP2LOCATION.BIN');
+            my $obj          = Geo::IP2Location::Lite->open('bin/IP2LOCATION.BIN');
             my $countryshort = $obj->get_country_short($ip);
-            my $countrylong = $obj->get_country_long($ip);
-            my $region = $obj->get_region($ip);
-            my $city = $obj->get_city($ip);
+            my $countrylong  = $obj->get_country_long($ip);
+            my $region       = $obj->get_region($ip);
+            my $city         = $obj->get_city($ip);
         }
     );
 

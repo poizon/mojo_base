@@ -27,7 +27,7 @@ sub login {
     if ($s->session('user_id') && $s->session('user_is_activated') && $s->session('user_is_admin')) {
         return $s->redirect_to('admin');
     }
-    
+
     if ($s->req->method eq 'POST') {
         my $username    = $s->param('username');
         my $password    = $s->param('password');
@@ -36,27 +36,28 @@ sub login {
         if (my $u = $s->model('User')->get(undef, username => $username)) {
             if (md5_hex("$password" . $s->app->conf->{salt}) eq $u->{password}) {
                 $s->session({
-                    user_id      => $u->{id},
-                    username     => $u->{username},
-                    email        => $u->{email},
-                    is_auth      => 1,
-                    is_admin     => $u->{is_admin},
-                    is_activated => $u->{is_activated},
-                    created      => $u->{created},
-                    last_visited => time
-                });
+                        user_id      => $u->{id},
+                        username     => $u->{username},
+                        email        => $u->{email},
+                        is_auth      => 1,
+                        is_admin     => $u->{is_admin},
+                        is_activated => $u->{is_activated},
+                        created      => $u->{created},
+                        last_visited => time
+                    }
+                );
 
                 return $s->redirect_to('admin');
             } else {
                 return $s->render(
                     template => 'admin/login',
-                    errors => {password => 'Некорректынй пароль'}
+                    errors   => {password => 'Некорректынй пароль'}
                 );
             }
         } else {
             return $s->render(
                 template => 'admin/login',
-                errors => {username => 'Пользователь не найден'}
+                errors   => {username => 'Пользователь не найден'}
             );
         }
     } else {
@@ -80,4 +81,4 @@ sub check_auth {
     return $s->redirect_to('admin_login');
 }
 
-1;    
+1;

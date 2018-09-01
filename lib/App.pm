@@ -18,16 +18,16 @@ our $VERSION = '0.1.2';
 has json  => sub { return JSON::XS->new->utf8; };
 has conf  => sub { return extend(do './conf/app.conf', do './conf/app-dev.conf'); };
 has debug => sub { return Mojo::Log->new(level => 'debug', path => 'logs/debug.log'); };
-has db    => sub {
+has db => sub {
     my $s   = shift;
     my $cfg = $s->conf->{db};
-    
+
     my $dbh = eval {
         DBI->connect(
             "dbi:SQLite:dbname=$cfg->{default}->{db_name}",
-            '', # no user
-            '', # no passwd
-            { RaiseError => 1, PrintError => 1, AutoCommit => 1, sqlite_unicode => 1 }
+            '',  # no user
+            '',  # no passwd
+            {RaiseError => 1, PrintError => 1, AutoCommit => 1, sqlite_unicode => 1}
         );
     } or croak("DATABASE_CONNECTION_ERROR: $DBI::errstr");
 
@@ -42,7 +42,7 @@ sub startup {
     $app->max_request_size($app->conf->{max_request_size});
 
     $app->log(Mojo::Log->new({'level' => 'info', 'path' => 'logs/app.log'}));
-    
+
     $app->static->paths(['static']);
     $app->renderer->paths(['tmpl']);
 
@@ -53,11 +53,11 @@ sub startup {
     $app->plugin('App::Helpers');
 
     # Replace default JSON parser (JSON::PP) on JSON::XS
-    monkey_patch "Mojo::JSON", encode => sub { return $app->json->encode( $_[1] ); };
-    monkey_patch "Mojo::JSON", decode => sub { return $app->json->decode( $_[1] ); };
+    monkey_patch "Mojo::JSON", encode => sub { return $app->json->encode($_[1]); };
+    monkey_patch "Mojo::JSON", decode => sub { return $app->json->decode($_[1]); };
     monkey_patch "Mojo::JSON", j      => sub {
-        if(ref $_[0]) { return $app->json->encode( $_[0] ); }
-        else          { return $app->json->decode( $_[0] ); }
+        if   (ref $_[0]) { return $app->json->encode($_[0]); }
+        else             { return $app->json->decode($_[0]); }
     };
 
     my $r = $app->routes;
@@ -94,19 +94,19 @@ sub admin_routes {
 
     # Users
     my $users = $auth->under('/users');
-    $auth->get('/')->to('admin#admin_index' )->name('admin'       );
+    $auth->get('/')->to('admin#admin_index')->name('admin');
     $auth->get('/logout')->to('admin#logout')->name('admin_logout');
 
-    $users->get('/'                        )->to('admin-user#list'  )->name('admin_user_list');
-    $users->get('/:id',  [id => qr/\d+/x]  )->to('admin-user#detail')->name('admin_user_detail');
-    $users->post('/:id', [id => qr/\d+/x]  )->to('admin-user#update')->name('admin_user_update');
-    $users->any(['GET', 'POST'] => '/new'  )->to('admin-user#create')->name('admin_user_create');
-    $users->delete('/:id', [id => qr/\d+/x])->to('admin-user#remove')->name('admin_user_delete');
+    $users->get('/')->to('admin-user#list')->name('admin_user_list');
+    $users->get('/:id', [ id => qr/\d+/x ])->to('admin-user#detail')->name('admin_user_detail');
+    $users->post('/:id', [ id => qr/\d+/x ])->to('admin-user#update')->name('admin_user_update');
+    $users->any([ 'GET', 'POST' ] => '/new')->to('admin-user#create')->name('admin_user_create');
+    $users->delete('/:id', [ id => qr/\d+/x ])->to('admin-user#remove')->name('admin_user_delete');
 
     # User permissions
 
     # Pages
-    $auth->get('/pages'    )->to('admin-pages#list'  )->name('admin_pages_list'  );
+    $auth->get('/pages')->to('admin-pages#list')->name('admin_pages_list');
     $auth->any('/pages/new')->to('admin-pages#create')->name('admin_pages_create');
 
     return;

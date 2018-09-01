@@ -21,7 +21,7 @@ sub new {
     return $self;
 }
 
-sub app   { return shift->{app};   }
+sub app   { return shift->{app}; }
 sub db    { return shift->app->db; }
 sub table { return shift->{table}; }
 
@@ -36,9 +36,7 @@ sub insert {
 sub remove {
     my ($s, %where) = @_;
 
-    my $sth = $s->db->prepare(
-        'DELETE FROM '.$s->table.' WHERE '.join(' AND ', map {"$_=?"} keys %where)
-    );
+    my $sth = $s->db->prepare('DELETE FROM ' . $s->table . ' WHERE ' . join(' AND ', map {"$_=?"} keys %where));
 
     return $sth->execute(values %where);
 }
@@ -46,11 +44,9 @@ sub remove {
 sub is_exists {
     my ($s, %where) = @_;
 
-    my $result = $s->db->selectrow_arrayref(
-        'SELECT 1 FROM '.$s->table.' WHERE '.join(' AND ', map {"$_=?"} keys %where),
-        undef,
-        values %where
-    );
+    my $result =
+        $s->db->selectrow_arrayref('SELECT 1 FROM ' . $s->table . ' WHERE ' . join(' AND ', map {"$_=?"} keys %where),
+        undef, values %where);
 
     return @$result && $result->[0];
 }
@@ -61,10 +57,8 @@ sub get {
     $fields = (($fields && @$fields) ? join ',', @$fields : '*');
 
     return $s->db->selectrow_hashref(
-        "SELECT $fields FROM ".$s->table." WHERE ".join(' AND ', map {"$_=?"} keys %where),
-        undef,
-        values %where
-    );
+        "SELECT $fields FROM " . $s->table . " WHERE " . join(' AND ', map {"$_=?"} keys %where),
+        undef, values %where);
 }
 
 sub update {
@@ -72,7 +66,12 @@ sub update {
 
     return 0 unless (%where || $data || %$data);
 
-    my $sql = 'UPDATE '.$s->table.' SET '.join(',', map {"$_=?"} keys %$data).' WHERE '. join(' AND ', map {"$_=?"} keys %where);
+    my $sql =
+          'UPDATE '
+        . $s->table . ' SET '
+        . join(',', map {"$_=?"} keys %$data)
+        . ' WHERE '
+        . join(' AND ', map {"$_=?"} keys %where);
 
     my $sth = $s->db->prepare($sql);
     $sth->execute(values %$data, values %where);
@@ -82,16 +81,16 @@ sub update {
 
 sub raw_do {
     my ($s, $sql) = @_;
-    return $s->db->do($sql)
+    return $s->db->do($sql);
 }
 
 sub raw_execute {
     my ($s, $sql, $params, @bind_values) = @_;
-    
+
     $params //= {};
-    
+
     my $sth = $s->db->prepare($sql, $params);
-    
+
     return $sth->execute(@bind_values);
 }
 
@@ -99,10 +98,10 @@ sub find {
     my ($s, $fields, $params) = @_;
 
     my @bind_values;
-    
+
     $fields = (($fields && @$fields) ? join ',', @$fields : '*');
 
-    my $sql = "SELECT $fields FROM ".$s->table;
+    my $sql = "SELECT $fields FROM " . $s->table;
 
     if ($params->{where}) {
         $sql .= " WHERE " . join(' AND ', map {"$_=?"} keys %{$params->{where}});
@@ -124,7 +123,7 @@ sub find {
         push @bind_values, $params->{offset};
     }
 
-    return $s->db->selectall_arrayref($sql, {Slice=>{}}, @bind_values);
+    return $s->db->selectall_arrayref($sql, {Slice => {}}, @bind_values);
 }
 
 sub transaction_begin {
@@ -173,7 +172,7 @@ App::Model::Base - Базовая модель, для наследования 
 
 =head1 DESCRIPTION
 
-L<App::Model::Base> 
+L<App::Model::Base>
 validation checks.
 
 =head1 ATTRIBUTES

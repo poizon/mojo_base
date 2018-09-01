@@ -33,16 +33,17 @@ SELECT p.id, p.title, p.body, p.dt_created, p.dt_modified, u.id AS user_id, u.us
  LIMIT 100
 EOF
 
-    return $s->db->selectall_arrayref($sql, {Slice=>{}});
+    return $s->db->selectall_arrayref($sql, {Slice => {}});
 }
 
 sub create {
     my ($s, $data) = @_;
 
     my @values;
-    my $fields = [keys %$data];
+    my $fields = [ keys %$data ];
 
-    my $sql = 'INSERT INTO '
+    my $sql =
+          'INSERT INTO '
         . $s->table . ' ('
         . (join ',', @$fields) . ')'
         . ' VALUES ('

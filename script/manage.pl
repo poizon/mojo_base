@@ -38,7 +38,7 @@ GetOptions(
     'db-downgrade=i'  => \&db_downgrade,
 );
 
-use constant COLORS  => {
+use constant COLORS => {
     red     => RED,
     green   => GREEN,
     blue    => BLUE,
@@ -54,33 +54,34 @@ sub create_user {
 
     my $is_admin = $value && $value == 1;
 
-    _clrprint(undef, "\n>> Creating ".($is_admin ? 'admin user' : 'regular user')."...\n\n", 'green');
+    _clrprint(undef, "\n>> Creating " . ($is_admin ? 'admin user' : 'regular user') . "...\n\n", 'green');
 
     my $username = _input('Enter username: ');
     my $email    = _input('Enter email: ');
 
-    croak 'Invalid email: '.$email unless $email =~ /^.+\@.+\..+$/mx;
-    
-    my $passwd   = _input('Enter password: ');
+    croak 'Invalid email: ' . $email unless $email =~ /^.+\@.+\..+$/mx;
 
-    croak 'Password too short: '.length $passwd.' (min 6)' if length $passwd < 6;
-    croak 'Password too long: '.length $passwd.' (max 32)' if length $passwd > 32;
+    my $passwd = _input('Enter password: ');
+
+    croak 'Password too short: ' . length $passwd . ' (min 6)' if length $passwd < 6;
+    croak 'Password too long: ' . length $passwd . ' (max 32)' if length $passwd > 32;
 
     my $passwd_confirm = _input('Confirm password: ');
     croak 'Error! Password missmatch!' if $passwd ne $passwd_confirm;
 
     my $result = $app->model('User')->create({
-        email        => $email,
-        username     => $username,
-        password     => $passwd,
-        is_admin     => $is_admin,
-        is_activated => 1
-    });
+            email        => $email,
+            username     => $username,
+            password     => $passwd,
+            is_admin     => $is_admin,
+            is_activated => 1
+        }
+    );
 
     croak 'Failed user creation' unless $result;
 
     _clrprint(undef, "\n>> User '$username' created successful\n\n", 'white');
-    
+
     exit;
 }
 
@@ -88,7 +89,7 @@ sub initdb {
     my ($opt) = @_;
 
     _clrprint(undef, "\n>> Initiation database...\n\n", 'green');
-    
+
     my $sql = <<'EOF';
     CREATE TABLE IF NOT EXISTS `migrations` (
        `id` INTEGER NOT NULL,
@@ -115,19 +116,12 @@ sub show_migrations {
 
     _clrprint(undef, "\n>> Show all applied migrations...\n\n", 'green');
 
-    if (
-        my @migrations = @{ $app->model('Migration')->find(
-            [qw/name applied_at comment/]
-        ) }
-    ) {
-        _clrprint(undef, ('-' x 80)."\n", 'white');
-        
-        _clrprint(
-            undef,
-            "+++ $_->{name}\t$_->{applied_at}\t$_->{comment}\n", 'white'
-        ) for (@migrations);
-        
-        _clrprint(undef, ('-' x 80)."\n\n", 'white');
+    if (my @migrations = @{$app->model('Migration')->find([qw/name applied_at comment/])}) {
+        _clrprint(undef, ('-' x 80) . "\n", 'white');
+
+        _clrprint(undef, "+++ $_->{name}\t$_->{applied_at}\t$_->{comment}\n", 'white') for (@migrations);
+
+        _clrprint(undef, ('-' x 80) . "\n\n", 'white');
     } else {
         _clrprint(undef, "--- empty ---\n\n", 'white');
     }
@@ -144,10 +138,8 @@ sub db_upgrade {
 
     opendir(my $dh, $migrations_path) or croak "Can not open directory $migrations_path: $@";
 
-    my $files = [ grep {
-        -f File::Spec->catfile($migrations_path, $_)
-        && $_ =~ /^.+\.sql$/mix
-    } readdir($dh) ];
+    my $files =
+        [ grep { -f File::Spec->catfile($migrations_path, $_) && $_ =~ /^.+\.sql$/mix } readdir($dh) ];
 
     closedir($dh);
 
@@ -159,12 +151,8 @@ sub db_upgrade {
     # Если имеются ранее примененные миграйии - искючаем их из списка
     my $new_migrations = [];
 
-    if (
-        my $applied_migration = $app->db->selectall_arrayref(
-            'SELECT name FROM migrations', {Slice=>{}}
-        )
-    ) {
-        my %applied_migration = map {$_->{name} => 1} @$applied_migration;
+    if (my $applied_migration = $app->db->selectall_arrayref('SELECT name FROM migrations', {Slice => {}})) {
+        my %applied_migration = map { $_->{name} => 1 } @$applied_migration;
         for (@$files) {
             push @$new_migrations, $_ unless exists $applied_migration{$_};
         }
@@ -176,7 +164,7 @@ sub db_upgrade {
     }
 
     # Применяем новые миграции
-    for my $migration (sort {$a cmp $b } @$new_migrations) {
+    for my $migration (sort { $a cmp $b } @$new_migrations) {
         _clrprint('applying', "$migration... ", 'white');
 
         # Открываем фал с миграцией на чтение
@@ -217,14 +205,14 @@ sub db_upgrade {
         $app->model('Migration')->transaction_begin();
 
         my $was_applied = 0;
-        
+
         eval {
             $app->model('Migration')->raw_do($_) for (split /;/, $apply_script);
-        
-            $was_applied = $app->model('Migration')->insert(
-                'INSERT INTO migrations (name,apply_script,revert_script,comment) VALUES (?,?,?,?)',
-                $migration, $apply_script, $revert_script, $comment
-            );
+
+            $was_applied =
+                $app->model('Migration')
+                ->insert('INSERT INTO migrations (name,apply_script,revert_script,comment) VALUES (?,?,?,?)',
+                $migration, $apply_script, $revert_script, $comment);
 
             $app->model('Migration')->commit();
         } or do {
@@ -239,7 +227,7 @@ sub db_upgrade {
     }
 
     print "\n";
-    
+
     exit;
 }
 
@@ -249,8 +237,7 @@ sub db_downgrade {
     _clrprint(undef, "\n>> Revert migrations to $value steps...\n\n", 'green');
 
     my $migrations = $app->model('Migration')->find(
-        [qw/id name applied_at comment revert_script/],
-        {
+        [qw/id name applied_at comment revert_script/], {
             order_by => {applied_at => 'DESC', 'id' => 'DESC'},
             limit    => $value
         }
@@ -262,16 +249,12 @@ sub db_downgrade {
     }
 
     for my $migration (@$migrations) {
-        _clrprint(
-            'reverting',
-            "$migration->{name}\t$migration->{applied_at}\t$migration->{comment}... ",
-            'white'
-        );
+        _clrprint('reverting', "$migration->{name}\t$migration->{applied_at}\t$migration->{comment}... ", 'white');
 
         $app->model('Migration')->transaction_begin();
 
         my $was_reverted = 0;
-        
+
         eval {
             $app->model('Migration')->raw_do($_) for (split /;/, $migration->{revert_script});
             $was_reverted = $app->model('Migration')->remove(id => $migration->{id});
@@ -289,7 +272,7 @@ sub db_downgrade {
     }
 
     print "\n";
-    
+
     exit;
 }
 
@@ -306,7 +289,8 @@ sub _clrprint {
 
     return 0 unless $msg;
 
-    my $clr = (defined $color && defined COLORS->{$color})
+    my $clr =
+        (defined $color && defined COLORS->{$color})
         ? COLORS->{$color}
         : COLORS->{white};
 

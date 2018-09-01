@@ -11,8 +11,8 @@ sub new {
     my ($class, %args) = @_;
 
     my $self = {
-        app   => $args{app},
-        table => 'stats',
+        app              => $args{app},
+        table            => 'stats',
         _available_stats => {
             'visits'       => 1,
             'visits.new'   => 1,
@@ -45,11 +45,11 @@ EOF
 
 sub dec {
     my ($s, $name, $value) = @_;
-    
+
     return 0 unless $s->_check_name($name);
-    
+
     $value //= 1;
-    
+
     my $sql = <<'EOF';
       INSERT INTO stats (name, value, dt)
                  VALUES (?, ?, ?)
@@ -77,14 +77,10 @@ EOF
 sub _upsert {
     my ($s, $sql, $name, $value) = @_;
 
-    my $dt = Time::Moment
-        ->now_utc()
-        ->with_minute(0)
-        ->with_second(0)
-        ->with_millisecond(0)
-        ->strftime("%Y-%m-%dT%H:%M:%S");
+    my $dt =
+        Time::Moment->now_utc()->with_minute(0)->with_second(0)->with_millisecond(0)->strftime("%Y-%m-%dT%H:%M:%S");
 
-    return $s->raw_execute($sql, {async => 1}, [$name, $value, $dt, $value]);
+    return $s->raw_execute($sql, {async => 1}, [ $name, $value, $dt, $value ]);
 }
 
 sub _check_name {
