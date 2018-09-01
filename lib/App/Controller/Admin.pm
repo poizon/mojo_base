@@ -12,7 +12,7 @@ use Data::Dumper;
 sub admin_index {
     my $s = shift;
     # $s->get_ip_info('185.46.16.244');
-    $s->model('Statistic')->inc_stats('visit');
+    $s->model('Statistic')->inc('visit');
     return $s->render(template => 'admin/index');
     # if ($s->session->{is_auth} && $s->session->{is_admin}) {
     #     return $s->render(template => 'index');
@@ -33,7 +33,7 @@ sub login {
         my $password    = $s->param('password');
         my $is_rememder = $s->param('is_remember');
 
-        if (my $u = $s->model('User')->get_by(undef, {username => $username})) {
+        if (my $u = $s->model('User')->get(undef, username => $username)) {
             if (md5_hex("$password" . $s->app->conf->{salt}) eq $u->{password}) {
                 $s->session({
                     user_id      => $u->{id},

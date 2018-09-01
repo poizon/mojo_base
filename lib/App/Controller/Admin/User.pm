@@ -10,7 +10,7 @@ use Data::Dumper;
 
 sub list {
     my $s = shift;
-    my $users = $s->model('User')->find_by(
+    my $users = $s->model('User')->find(
         ['id','username','email','first_name','last_name','created','is_activated','is_admin'],
         {limit => 100}
     );
@@ -50,7 +50,7 @@ sub detail {
     my $s = shift;
     my $id = $s->stash('id');
 
-    if (my $u = $s->model('User')->get_by_id($id)) {
+    if (my $u = $s->model('User')->get(undef, id => $id)) {
         return $s->render(template => 'admin/users/create', user => $u);
     }
 
@@ -64,9 +64,8 @@ sub update {
     my $id = $params->{id};
 
     # TODO: провалидировать данные
-    if (my $u = $s->model('User')->get_by_id($id)) {
-        my $result = $s->model('User')->update_by_id(
-            $id,
+    if (my $u = $s->model('User')->get(undef, id => $id)) {
+        my $result = $s->model('User')->update(
             {
                 username     => $params->{username} || $u->{username},
                 email        => $params->{email} || $u->{email},
@@ -75,7 +74,8 @@ sub update {
                 password     => $params->{password} || $u->{password},
                 is_activated => $params->{is_active} eq 'on' ? 1 : 0,
                 is_admin     => $params->{is_admin} eq 'on' ? 1 : 0
-            }
+            },
+            id => $id
         );
 
         if ($result) {
@@ -101,7 +101,7 @@ sub remove {
     my $s = shift;
     my $id = int($s->stash('id'));
 
-    if (my $r = $s->model('User')->remove_by_id($id)) {
+    if (my $r = $s->model('User')->remove(id => $id)) {
         $s->session(expires => 1) if ($id == int($s->session('user_id')));
         return $s->render(json => {status => 'ok'});
     }

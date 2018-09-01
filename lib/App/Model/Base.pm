@@ -61,21 +61,21 @@ sub get {
     $fields = (($fields && @$fields) ? join ',', @$fields : '*');
 
     return $s->db->selectrow_hashref(
-        "SELECT $fields FROM $s->table WHERE ".join(' AND ', map {"$_=?"} keys %where),
+        "SELECT $fields FROM ".$s->table." WHERE ".join(' AND ', map {"$_=?"} keys %where),
         undef,
         values %where
     );
 }
 
-sub update_by_id {
-    my ($s, $id, $data) = @_;
+sub update {
+    my ($s, $data, %where) = @_;
 
-    return 0 unless ($id || $data || %$data);
+    return 0 unless (%where || $data || %$data);
 
-    my $sql = 'UPDATE '.$s->table.' SET '.join(',', map {"$_=?"} keys %$data).' WHERE id=?';
+    my $sql = 'UPDATE '.$s->table.' SET '.join(',', map {"$_=?"} keys %$data).' WHERE '. join(' AND ', map {"$_=?"} keys %where);
 
     my $sth = $s->db->prepare($sql);
-    $sth->execute(values %$data, $id);
+    $sth->execute(values %$data, values %where);
 
     return $sth->rows();
 }
@@ -87,20 +87,27 @@ sub raw_do {
 
 sub raw_execute {
     my ($s, $sql, $params, @bind_values) = @_;
+    
+    $params //= {};
+    
     my $sth = $s->db->prepare($sql, $params);
+    
     return $sth->execute(@bind_values);
 }
 
 sub find {
     my ($s, $fields, $params) = @_;
 
-    return unless $params && $params->{where} && %{$params->{where}};
-
-    my @bind_values = values %{$params->{where}};
+    my @bind_values;
     
     $fields = (($fields && @$fields) ? join ',', @$fields : '*');
 
-    my $sql = "SELECT $fields FROM $s->table WHERE " . join(' AND ', map {"$_=?"} keys %{$params->{where}});
+    my $sql = "SELECT $fields FROM ".$s->table;
+
+    if ($params->{where}) {
+        $sql .= " WHERE " . join(' AND ', map {"$_=?"} keys %{$params->{where}});
+        push @bind_values, values %{$params->{where}};
+    }
 
     if ($params->{order_by} && %{$params->{order_by}}) {
         $sql .= ' ORDER BY ';
@@ -116,7 +123,7 @@ sub find {
         $sql .= ' OFFSET ?';
         push @bind_values, $params->{offset};
     }
-    
+
     return $s->db->selectall_arrayref($sql, {Slice=>{}}, @bind_values);
 }
 

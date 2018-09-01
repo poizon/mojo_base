@@ -21,6 +21,7 @@ use Term::ANSIColor qw(:constants);
 use lib 'lib';
 use App;
 
+binmode(STDOUT, ':utf8');
 
 my $app = App->new();
 
@@ -115,8 +116,8 @@ sub show_migrations {
     _clrprint(undef, "\n>> Show all applied migrations...\n\n", 'green');
 
     if (
-        my @migrations = @{ $app->model('Migration')->find_by(
-            ['name', 'applied_at', 'comment']
+        my @migrations = @{ $app->model('Migration')->find(
+            [qw/name applied_at comment/]
         ) }
     ) {
         _clrprint(undef, ('-' x 80)."\n", 'white');
@@ -222,7 +223,7 @@ sub db_upgrade {
         
             $was_applied = $app->model('Migration')->insert(
                 'INSERT INTO migrations (name,apply_script,revert_script,comment) VALUES (?,?,?,?)',
-                [$migration, $apply_script, $revert_script, $comment]
+                $migration, $apply_script, $revert_script, $comment
             );
 
             $app->model('Migration')->commit();
@@ -247,13 +248,12 @@ sub db_downgrade {
 
     _clrprint(undef, "\n>> Revert migrations to $value steps...\n\n", 'green');
 
-    my $migrations = $app->model('Migration')->find_by(
-        ['id', 'name', 'applied_at', 'comment', 'revert_script'],
+    my $migrations = $app->model('Migration')->find(
+        [qw/id name applied_at comment revert_script/],
         {
-            order_by => [ ['applied_at' => 'DESC'], ['id' => 'DESC'] ],
-            limit    => '?'
-        },
-        [$value]
+            order_by => {applied_at => 'DESC', 'id' => 'DESC'},
+            limit    => $value
+        }
     );
 
     unless ($migrations) {
@@ -274,9 +274,10 @@ sub db_downgrade {
         
         eval {
             $app->model('Migration')->raw_do($_) for (split /;/, $migration->{revert_script});
-            $was_reverted = $app->model('Migration')->remove_by_id($migration->{id});
+            $was_reverted = $app->model('Migration')->remove(id => $migration->{id});
             $app->model('Migration')->commit();
         } or do {
+            print($@);
             $app->model('Migration')->rollback();
         };
 
