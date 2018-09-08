@@ -32,10 +32,10 @@ GetOptions(
     'create-user=i' => \&create_user,
 
     # migrations
-    'initdb'          => \&initdb,
+    'init-db'          => \&init_db,
     'show-migrations' => \&show_migrations,
-    'db-upgrade'      => \&db_upgrade,
-    'db-downgrade=i'  => \&db_downgrade,
+    'upgrade-db'      => \&upgrade_db,
+    'downgrade-db=i'  => \&downgrade_db,
 );
 
 use constant COLORS => {

@@ -1,7 +1,7 @@
 perl = carton exec perl
 morbo = carton exec morbo
 
-.SILENT: run create-user create-superuser show-migrations db-upgrade db-downgrade
+.SILENT: run create-user create-superuser init-db show-migrations upgrade-db downgrade-db
 
 run:
 	$(morbo) -w lib/ -w tmpl/ -l 'http://0.0.0.0:3030' ./script/app
@@ -12,11 +12,14 @@ create-user:
 create-superuser:
 	$(perl) script/manage.pl --create-user=1
 
+init-db:
+	$(perl) script/manage.pl --init-db
+
 show-migrations:
 	$(perl) script/manage.pl --show-migrations
 
-db-upgrade:
-	$(perl) script/manage.pl --db-upgrade
+upgrade-db:
+	$(perl) script/manage.pl --upgrade-db
 
-db-downgrade:
-	$(perl) script/manage.pl --db-downgrade=1
+downgrade-db:
+	$(perl) script/manage.pl --downgrade-db=1
