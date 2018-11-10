@@ -19,8 +19,8 @@ Server side:
 * Geo::IP2Location::Lite==0.11
 
 Client side:
-* JQuery v3.2.1
-* Bootstrap v4.1.1
+* JQuery v3.3.1
+* Bootstrap v4.1.3
 
 ## Install
 
