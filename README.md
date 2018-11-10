@@ -11,10 +11,10 @@ In future versions it is planned to implement the functionality for: admin part,
 ## Used software
 
 Server side:
-* Mojolicious==7.85
+* Mojolicious==8.06
 * JSON::XS==3.04
 * Time::Moment==0.44
-* DBI==1.641
+* DBI==1.642
 * DBD::SQLite==1.58
 * Geo::IP2Location::Lite==0.11
 
@@ -27,7 +27,7 @@ Client side:
 ```shell
 $ git clone git@github.com:ChaoticEvil/mojo_base.git
 $ cd mojo_base
-$ cpan i Carton
+$ sudo cpan install Carton
 $ carton install
 ```
 
@@ -37,5 +37,5 @@ $ carton install
 - `make create-user` - add new regular user
 - `make create-superuser` - add new admin user
 - `make show-migrations` - show all applied sql migrations
-- `make db-upgrade` - find and aplly all new sql migrations
-- `make db-downgrade` - revert last applied sql migration
+- `make upgrade-db` - find and aplly all new sql migrations
+- `make downgrade-db` - revert last applied sql migration

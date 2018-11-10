@@ -32,7 +32,7 @@ GetOptions(
     'create-user=i' => \&create_user,
 
     # migrations
-    'init-db'          => \&init_db,
+    'init-db'         => \&init_db,
     'show-migrations' => \&show_migrations,
     'upgrade-db'      => \&upgrade_db,
     'downgrade-db=i'  => \&downgrade_db,
